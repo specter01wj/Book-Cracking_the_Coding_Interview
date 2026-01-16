@@ -11,10 +11,6 @@ Written by Gayle Laakmann McDowell.
 
 ## Table of Contents
 
-## Table of Contents
-
-## Table of Contents
-
 | No. | Chapter | Status |
 |:--:|:--|:--:|
 | 0 | Introduction | ✅ |
