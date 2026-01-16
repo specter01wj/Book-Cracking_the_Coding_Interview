@@ -1,24 +1,98 @@
-# Compiled class file
+################################
+# OS Files
+################################
+.DS_Store
+.DS_Store*
+Thumbs.db
+ehthumbs.db
+Icon?
+
+################################
+# IntelliJ IDEA
+################################
+.idea/
+*.iml
+out/
+
+################################
+# Eclipse / NetBeans
+################################
+.project
+.classpath
+.settings/
+nbproject/
+
+################################
+# VS Code
+################################
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+################################
+# Java Build Artifacts
+################################
+target/
+build/
+bin/
+obj/
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
+
+################################
+# Node / JavaScript / TypeScript
+################################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+coverage/
+.out-tsc/
+
+################################
+# Logs
+################################
+*.log
+
+################################
+# Temporary / Runtime Files
+################################
+tmp/
+temp/
+runtime/
+.symlinks
+
+################################
+# MongoDB (local only)
+################################
+*.lock
+*.0
+*.1
+*.ns
+journal/
+
+################################
+# Archives & Packages
+################################
 *.zip
+*.tar
 *.tar.gz
 *.rar
+*.7z
+*.gz
+*.dmg
+*.iso
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+################################
+# Misc
+################################
+*.m4a
+connect.lock
+.sass-cache/
+.angular/
+.angular/cache/
