@@ -19,8 +19,23 @@ public class Chap1_permutation {
         test(solver.permutationBySort("a b", "b a"), true, "whitespace");
 
         System.out.println("\n✅ Observation: O(n log n) time, O(n) space.");
+        
+        // --------------------------------------------------
+        System.out.println("\nStep 2: permutationByCount (character count)\n");
+
+        test(solver.permutationByCount("abc", "bca"), true, "abc vs bca");
+        test(solver.permutationByCount("abc", "abcd"), false, "length mismatch");
+        test(solver.permutationByCount("God", "dog"), false, "case-sensitive");
+        test(solver.permutationByCount("a b", "b a"), true, "whitespace");
+
+        System.out.println("\n✅ Observation: O(n) time, O(1) space.");
+
+        System.out.println("\n>>> Study Complete: Chapter 1.2 <<<");
     }
     
+    // ==================================================
+    // Solution 1: Sort strings and compare
+    // ==================================================
     public boolean permutationBySort(String s, String t) {
         if (s.length() != t.length()) return false;
         
@@ -34,6 +49,27 @@ public class Chap1_permutation {
         return new String(content);
     }
     
+    // ==================================================
+    // Solution 2: Character count (ASCII)
+    // ==================================================
+    public boolean permutationByCount(String s, String t) {
+        if (s.length() != t.length()) return false;
+
+        int[] letters = new int[128];
+
+        for (char c : s.toCharArray()) {
+            letters[c]++;
+        }
+
+        for (int i = 0; i < t.length(); i++) {
+            char c = t.charAt(i);
+            letters[c]--;
+            if (letters[c] < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
     
     // ==================================================
     // Test helper
