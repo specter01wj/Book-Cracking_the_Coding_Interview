@@ -1,63 +1,29 @@
 // =========================================
-// Solution 1: isUniqueChars (ASCII boolean array)
-// Time: O(n), Space: O(1)
+// Solution 1: Sort and compare
 // =========================================
-function isUniqueChars(str: string): boolean {
-    if (str.length > 128) return false;
+function permutationBySort(s: string, t: string): boolean {
+    if (s.length !== t.length) return false;
+    return s.split('').sort().join('') ===
+           t.split('').sort().join('');
+}
 
-    const seen: boolean[] = new Array(128).fill(false);
+// =========================================
+// Solution 2: Character count (ASCII)
+// =========================================
+function permutationByCount(s: string, t: string): boolean {
+    if (s.length !== t.length) return false;
 
-    for (let i = 0; i < str.length; i++) {
-        const code = str.charCodeAt(i);
-        if (seen[code]) {
+    const letters: number[] = new Array(128).fill(0);
+
+    for (const c of s) {
+        letters[c.charCodeAt(0)]++;
+    }
+
+    for (const c of t) {
+        letters[c.charCodeAt(0)]--;
+        if (letters[c.charCodeAt(0)] < 0) {
             return false;
         }
-        seen[code] = true;
-    }
-    return true;
-}
-
-// =========================================
-// Solution 2: isUniqueNoDS (no data structures)
-// Time: O(n^2), Space: O(1)
-// =========================================
-function isUniqueNoDS(str: string): boolean {
-    for (let i = 0; i < str.length; i++) {
-        for (let j = i + 1; j < str.length; j++) {
-            if (str[i] === str[j]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-// =========================================
-// Solution 3: isUniqueBitVector (a–z only)
-// Time: O(n), Space: O(1)
-// =========================================
-function isUniqueBitVector(str: string): boolean {
-    let checker = 0;
-
-    for (let i = 0; i < str.length; i++) {
-        const val = str.charCodeAt(i) - 97; // 'a'
-        if ((checker & (1 << val)) !== 0) {
-            return false;
-        }
-        checker |= (1 << val);
-    }
-    return true;
-}
-
-// =========================================
-// Solution 4: isUniqueHashSet (general-purpose)
-// Time: O(n), Space: O(n)
-// =========================================
-function isUniqueHashSet(str: string): boolean {
-    const set = new Set<string>();
-    for (const ch of str) {
-        if (set.has(ch)) return false;
-        set.add(ch);
     }
     return true;
 }
@@ -65,28 +31,23 @@ function isUniqueHashSet(str: string): boolean {
 // =========================================
 // Tests + DOM output
 // =========================================
-const inputs: string[] = ["abcdef", "hello", "", "AaBbCc"];
+const tests: [string, string][] = [
+    ["abc", "bca"],
+    ["abc", "abcd"],
+    ["God", "dog"],
+    ["a b", "b a"]
+];
 
-let output = ">>> CTCI Chapter 1.1 – Is Unique <<<<br><br>";
+let output = ">>> CTCI Chapter 1.2 – Check Permutation <<<br><br>";
 
-output += "<b>Solution 1: isUniqueChars (ASCII)</b><br>";
-inputs.forEach(s => {
-    output += `Input: "${s}" → ${isUniqueChars(s)}<br>`;
+output += "<b>Solution 1: permutationBySort</b><br>";
+tests.forEach(t => {
+    output += `"${t[0]}" vs "${t[1]}" → ${permutationBySort(t[0], t[1])}<br>`;
 });
 
-output += "<br><b>Solution 2: isUniqueNoDS</b><br>";
-inputs.forEach(s => {
-    output += `Input: "${s}" → ${isUniqueNoDS(s)}<br>`;
-});
-
-output += "<br><b>Solution 3: isUniqueBitVector (a–z only)</b><br>";
-["abcdef", "hello", "xyz"].forEach(s => {
-    output += `Input: "${s}" → ${isUniqueBitVector(s)}<br>`;
-});
-
-output += "<br><b>Solution 4: isUniqueHashSet</b><br>";
-inputs.forEach(s => {
-    output += `Input: "${s}" → ${isUniqueHashSet(s)}<br>`;
+output += "<br><b>Solution 2: permutationByCount</b><br>";
+tests.forEach(t => {
+    output += `"${t[0]}" vs "${t[1]}" → ${permutationByCount(t[0], t[1])}<br>`;
 });
 
 const webHeading = document.querySelector('#t1') as HTMLElement;
