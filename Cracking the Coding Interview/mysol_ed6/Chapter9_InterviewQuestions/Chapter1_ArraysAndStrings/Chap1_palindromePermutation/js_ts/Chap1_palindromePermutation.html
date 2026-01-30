@@ -6,38 +6,67 @@
 
 			$(document).ready(function(){
         
-        // =========================================
-				// URLify (JS version)
-				// =========================================
-				let urlify = function(str, trueLength) {
-					let result = [];
-					for (let i = 0; i < trueLength; i++) {
-						if (str[i] === ' ') {
-							result.push('%', '2', '0');
-						} else {
-							result.push(str[i]);
-						}
-					}
-					return result.join('');
-				};
+        function getCharNumber(c) {
+          const code = c.toLowerCase().charCodeAt(0);
+          if (code >= 97 && code <= 122) return code - 97;
+          return -1;
+        }
 
-				// =========================================
-				// Tests
-				// =========================================
-				const tests = [
-					["Mr John Smith    ", 13],
-					["Hello World  ", 11],
-					["NoSpace", 7],
-					[" a b   ", 4]
-				];
+        // Solution 1: count table
+        function isPermutationOfPalindrome(str) {
+          const table = new Array(26).fill(0);
+          for (const c of str) {
+            const x = getCharNumber(c);
+            if (x !== -1) table[x]++;
+          }
+          let foundOdd = false;
+          for (const count of table) {
+            if (count % 2 === 1) {
+              if (foundOdd) return false;
+              foundOdd = true;
+            }
+          }
+          return true;
+        }
 
-				let output = "<h2>>> CTCI Chapter 1.3 – URLify</h2>";
+        // Solution 2: optimized count
+        function isPermutationOfPalindromeOptimized(str) {
+          const table = new Array(26).fill(0);
+          let countOdd = 0;
+          for (const c of str) {
+            const x = getCharNumber(c);
+            if (x !== -1) {
+              table[x]++;
+              countOdd += (table[x] % 2 === 1) ? 1 : -1;
+            }
+          }
+          return countOdd <= 1;
+        }
 
-				tests.forEach(t => {
-					output += `"${t[0]}" (len=${t[1]}) → ${urlify(t[0], t[1])}<br>`;
-				});
+        // Solution 3: bit vector
+        function isPermutationOfPalindromeBitVector(str) {
+          let bitVector = 0;
+          for (const c of str) {
+            const x = getCharNumber(c);
+            if (x !== -1) {
+              bitVector ^= (1 << x);
+            }
+          }
+          return bitVector === 0 || (bitVector & (bitVector - 1)) === 0;
+        }
 
-				$('#t1').html(output);
+        const tests = ["Tact Coa", "racecar", "hello"];
+
+        let output = "<h2>>> CTCI Chapter 1.4 – Palindrome Permutation</h2>";
+
+        tests.forEach(s => {
+          output += `"${s}" → `
+            + isPermutationOfPalindrome(s) + " | "
+            + isPermutationOfPalindromeOptimized(s) + " | "
+            + isPermutationOfPalindromeBitVector(s) + "<br>";
+        });
+
+        $('#t1').html(output);
 			});
 
 		</script>
