@@ -1,34 +1,61 @@
-// =========================================
-// URLify (TypeScript version)
-// =========================================
-function urlify(str: string, trueLength: number): string {
-    let result: string[] = [];
-
-    for (let i = 0; i < trueLength; i++) {
-        if (str[i] === ' ') {
-            result.push('%', '2', '0');
-        } else {
-            result.push(str[i]);
-        }
-    }
-    return result.join('');
+function getCharNumber(c: string): number {
+    const code = c.toLowerCase().charCodeAt(0);
+    if (code >= 97 && code <= 122) return code - 97;
+    return -1;
 }
 
-// =========================================
-// Tests + DOM output
-// =========================================
-const tests: [string, number][] = [
-    ["Mr John Smith    ", 13],
-    ["Hello World  ", 11],
-    ["NoSpace", 7],
-    [" a b   ", 4]
-];
+// Solution 1
+function isPermutationOfPalindrome(str: string): boolean {
+    const table = new Array<number>(26).fill(0);
+    for (const c of str) {
+        const x = getCharNumber(c);
+        if (x !== -1) table[x]++;
+    }
+    let foundOdd = false;
+    for (const count of table) {
+        if (count % 2 === 1) {
+            if (foundOdd) return false;
+            foundOdd = true;
+        }
+    }
+    return true;
+}
 
-let output = ">>> CTCI Chapter 1.3 – URLify <<<br><br>";
+// Solution 2
+function isPermutationOfPalindromeOptimized(str: string): boolean {
+    const table = new Array<number>(26).fill(0);
+    let countOdd = 0;
+    for (const c of str) {
+        const x = getCharNumber(c);
+        if (x !== -1) {
+            table[x]++;
+            countOdd += (table[x] % 2 === 1) ? 1 : -1;
+        }
+    }
+    return countOdd <= 1;
+}
 
-tests.forEach(t => {
-    output += `"${t[0]}" (len=${t[1]}) → ${urlify(t[0], t[1])}<br>`;
+// Solution 3
+function isPermutationOfPalindromeBitVector(str: string): boolean {
+    let bitVector = 0;
+    for (const c of str) {
+        const x = getCharNumber(c);
+        if (x !== -1) {
+            bitVector ^= (1 << x);
+        }
+    }
+    return bitVector === 0 || (bitVector & (bitVector - 1)) === 0;
+}
+
+// Tests
+const tests = ["Tact Coa", "racecar", "hello"];
+
+let output = ">>> CTCI Chapter 1.4 – Palindrome Permutation <<<br><br>";
+tests.forEach(s => {
+    output += `"${s}" → `
+        + isPermutationOfPalindrome(s) + " | "
+        + isPermutationOfPalindromeOptimized(s) + " | "
+        + isPermutationOfPalindromeBitVector(s) + "<br>";
 });
 
-const webHeading = document.querySelector('#t1') as HTMLElement;
-webHeading.innerHTML = output;
+(document.querySelector('#t1') as HTMLElement).innerHTML = output;
