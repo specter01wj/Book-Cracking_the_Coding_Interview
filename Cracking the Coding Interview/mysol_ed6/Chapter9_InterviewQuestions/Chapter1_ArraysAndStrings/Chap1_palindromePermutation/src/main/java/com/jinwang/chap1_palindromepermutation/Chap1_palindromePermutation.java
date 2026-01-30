@@ -16,7 +16,21 @@ public class Chap1_palindromePermutation {
         test(solver.isPermutationOfPalindrome("racecar"), true, "racecar");
         test(solver.isPermutationOfPalindrome("hello"), false, "hello");
         
-        
+        // --------------------------------------------------
+        System.out.println("\nStep 2: isPermutationOfPalindromeOptimized (count on the fly)\n");
+
+        test(solver.isPermutationOfPalindromeOptimized("Tact Coa"), true, "Tact Coa");
+        test(solver.isPermutationOfPalindromeOptimized("racecar"), true, "racecar");
+        test(solver.isPermutationOfPalindromeOptimized("hello"), false, "hello");
+
+        // --------------------------------------------------
+        System.out.println("\nStep 3: isPermutationOfPalindromeBitVector (bit trick)\n");
+
+        test(solver.isPermutationOfPalindromeBitVector("Tact Coa"), true, "Tact Coa");
+        test(solver.isPermutationOfPalindromeBitVector("racecar"), true, "racecar");
+        test(solver.isPermutationOfPalindromeBitVector("hello"), false, "hello");
+
+        System.out.println("\n>>> Study Complete: Chapter 1.4 <<<");
     }
     
     // ==================================================
@@ -36,6 +50,60 @@ public class Chap1_palindromePermutation {
             }
         }
         return true;
+    }
+    
+    // ==================================================
+    // Solution 2: Count odds while scanning
+    // ==================================================
+    public boolean isPermutationOfPalindromeOptimized(String phrase) {
+        int[] table = new int[26];
+        int countOdd = 0;
+
+        for (char c : phrase.toCharArray()) {
+            int x = getCharNumber(c);
+            if (x != -1) {
+                table[x]++;
+                if (table[x] % 2 == 1) {
+                    countOdd++;
+                } else {
+                    countOdd--;
+                }
+            }
+        }
+        return countOdd <= 1;
+    }
+
+    // ==================================================
+    // Solution 3: Bit vector trick
+    // ==================================================
+    public boolean isPermutationOfPalindromeBitVector(String phrase) {
+        int bitVector = createBitVector(phrase);
+        return bitVector == 0 || checkExactlyOneBitSet(bitVector);
+    }
+
+    private int createBitVector(String phrase) {
+        int bitVector = 0;
+        for (char c : phrase.toCharArray()) {
+            int x = getCharNumber(c);
+            if (x != -1) {
+                bitVector = toggle(bitVector, x);
+            }
+        }
+        return bitVector;
+    }
+
+    private int toggle(int bitVector, int index) {
+        int mask = 1 << index;
+        if ((bitVector & mask) == 0) {
+            bitVector |= mask;
+        } else {
+            bitVector &= ~mask;
+        }
+        return bitVector;
+    }
+
+    private boolean checkExactlyOneBitSet(int bitVector) {
+        return (bitVector & (bitVector - 1)) == 0;
     }
     
     // ==================================================
