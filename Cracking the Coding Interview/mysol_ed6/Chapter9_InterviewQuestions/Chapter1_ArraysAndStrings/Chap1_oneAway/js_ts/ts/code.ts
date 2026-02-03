@@ -1,61 +1,86 @@
-function getCharNumber(c: string): number {
-    const code = c.toLowerCase().charCodeAt(0);
-    if (code >= 97 && code <= 122) return code - 97;
-    return -1;
+// =========================================
+// Solution 1: Separated logic
+// =========================================
+function oneEditAwaySeparated(first: string, second: string): boolean {
+    if (first.length === second.length) {
+        return oneEditReplace(first, second);
+    } else if (first.length + 1 === second.length) {
+        return oneEditInsert(first, second);
+    } else if (first.length - 1 === second.length) {
+        return oneEditInsert(second, first);
+    }
+    return false;
 }
 
-// Solution 1
-function isPermutationOfPalindrome(str: string): boolean {
-    const table = new Array<number>(26).fill(0);
-    for (const c of str) {
-        const x = getCharNumber(c);
-        if (x !== -1) table[x]++;
-    }
-    let foundOdd = false;
-    for (const count of table) {
-        if (count % 2 === 1) {
-            if (foundOdd) return false;
-            foundOdd = true;
+function oneEditReplace(s1: string, s2: string): boolean {
+    let foundDiff = false;
+    for (let i = 0; i < s1.length; i++) {
+        if (s1[i] !== s2[i]) {
+            if (foundDiff) return false;
+            foundDiff = true;
         }
     }
     return true;
 }
 
-// Solution 2
-function isPermutationOfPalindromeOptimized(str: string): boolean {
-    const table = new Array<number>(26).fill(0);
-    let countOdd = 0;
-    for (const c of str) {
-        const x = getCharNumber(c);
-        if (x !== -1) {
-            table[x]++;
-            countOdd += (table[x] % 2 === 1) ? 1 : -1;
+function oneEditInsert(s1: string, s2: string): boolean {
+    let i = 0, j = 0;
+    while (i < s1.length && j < s2.length) {
+        if (s1[i] !== s2[j]) {
+            if (i !== j) return false;
+            j++;
+        } else {
+            i++; j++;
         }
     }
-    return countOdd <= 1;
+    return true;
 }
 
-// Solution 3
-function isPermutationOfPalindromeBitVector(str: string): boolean {
-    let bitVector = 0;
-    for (const c of str) {
-        const x = getCharNumber(c);
-        if (x !== -1) {
-            bitVector ^= (1 << x);
+// =========================================
+// Solution 2: Merged logic (preferred)
+// =========================================
+function oneEditAway(first: string, second: string): boolean {
+    if (Math.abs(first.length - second.length) > 1) return false;
+
+    const shorter = first.length < second.length ? first : second;
+    const longer  = first.length < second.length ? second : first;
+
+    let i = 0, j = 0;
+    let foundDiff = false;
+
+    while (i < shorter.length && j < longer.length) {
+        if (shorter[i] !== longer[j]) {
+            if (foundDiff) return false;
+            foundDiff = true;
+            if (shorter.length === longer.length) i++;
+        } else {
+            i++;
         }
+        j++;
     }
-    return bitVector === 0 || (bitVector & (bitVector - 1)) === 0;
+    return true;
 }
 
-// Tests
-const tests = ["Tact Coa", "racecar", "hello"];
+// =========================================
+// Tests + DOM output
+// =========================================
+const tests: [string, string][] = [
+    ["pale", "ple"],
+    ["pales", "pale"],
+    ["pale", "bale"],
+    ["pale", "bake"]
+];
 
-let output = ">>> CTCI Chapter 1.4 – Palindrome Permutation <<<br><br>";
-tests.forEach(s => {
-    output += `"${s}" → `
-        + isPermutationOfPalindrome(s) + " | "
-        + isPermutationOfPalindromeOptimized(s) + " | "
-        + isPermutationOfPalindromeBitVector(s) + "<br>";
+let output = ">>> CTCI Chapter 1.5 – One Away <<<br><br>";
+
+output += "<b>Solution 1: oneEditAwaySeparated</b><br>";
+tests.forEach(t => {
+    output += `"${t[0]}" vs "${t[1]}" → ${oneEditAwaySeparated(t[0], t[1])}<br>`;
+});
+
+output += "<br><b>Solution 2: oneEditAway (merged)</b><br>";
+tests.forEach(t => {
+    output += `"${t[0]}" vs "${t[1]}" → ${oneEditAway(t[0], t[1])}<br>`;
 });
 
 (document.querySelector('#t1') as HTMLElement).innerHTML = output;
