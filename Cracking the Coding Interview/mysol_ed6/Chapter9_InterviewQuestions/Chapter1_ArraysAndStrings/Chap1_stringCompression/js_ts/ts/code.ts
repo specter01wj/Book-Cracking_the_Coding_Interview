@@ -1,54 +1,68 @@
 // =========================================
-// Solution 1: Sort and compare
+// Solution 1 (BAD)
 // =========================================
-function permutationBySort(s: string, t: string): boolean {
-    if (s.length !== t.length) return false;
-    return s.split('').sort().join('') ===
-           t.split('').sort().join('');
-}
+function compressBad(str: string): string {
+    let compressed = "";
+    let count = 0;
 
-// =========================================
-// Solution 2: Character count (ASCII)
-// =========================================
-function permutationByCount(s: string, t: string): boolean {
-    if (s.length !== t.length) return false;
-
-    const letters: number[] = new Array(128).fill(0);
-
-    for (const c of s) {
-        letters[c.charCodeAt(0)]++;
-    }
-
-    for (const c of t) {
-        letters[c.charCodeAt(0)]--;
-        if (letters[c.charCodeAt(0)] < 0) {
-            return false;
+    for (let i = 0; i < str.length; i++) {
+        count++;
+        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
+            compressed += str[i] + count;
+            count = 0;
         }
     }
-    return true;
+    return compressed.length < str.length ? compressed : str;
 }
 
 // =========================================
-// Tests + DOM output
+// Solution 2
 // =========================================
-const tests: [string, string][] = [
-    ["abc", "bca"],
-    ["abc", "abcd"],
-    ["God", "dog"],
-    ["a b", "b a"]
-];
+function compress(str: string): string {
+    let result: string[] = [];
+    let count = 0;
 
-let output = ">>> CTCI Chapter 1.2 – Check Permutation <<<br><br>";
+    for (let i = 0; i < str.length; i++) {
+        count++;
+        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
+            result.push(str[i] + count);
+            count = 0;
+        }
+    }
+    const compressed = result.join('');
+    return compressed.length < str.length ? compressed : str;
+}
 
-output += "<b>Solution 1: permutationBySort</b><br>";
-tests.forEach(t => {
-    output += `"${t[0]}" vs "${t[1]}" → ${permutationBySort(t[0], t[1])}<br>`;
-});
+// =========================================
+// Solution 3
+// =========================================
+function compressOptimized(str: string): string {
+    let finalLength = 0;
+    let count = 0;
 
-output += "<br><b>Solution 2: permutationByCount</b><br>";
-tests.forEach(t => {
-    output += `"${t[0]}" vs "${t[1]}" → ${permutationByCount(t[0], t[1])}<br>`;
-});
+    for (let i = 0; i < str.length; i++) {
+        count++;
+        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
+            finalLength += 1 + count.toString().length;
+            count = 0;
+        }
+    }
+    if (finalLength >= str.length) return str;
+    return compress(str);
+}
 
-const webHeading = document.querySelector('#t1') as HTMLElement;
-webHeading.innerHTML = output;
+// Tests
+const tests = ["aabcccccaaa", "abcdef"];
+
+let output = ">>> CTCI Chapter 1.6 – String Compression <<<br><br>";
+
+output += "<b>Solution 1 (Bad)</b><br>";
+tests.forEach(s => output += `${s} → ${compressBad(s)}<br>`);
+
+output += "<br><b>Solution 2</b><br>";
+tests.forEach(s => output += `${s} → ${compress(s)}<br>`);
+
+output += "<br><b>Solution 3</b><br>";
+tests.forEach(s => output += `${s} → ${compressOptimized(s)}<br>`);
+
+(document.querySelector('#t1') as HTMLElement).innerHTML = output;
