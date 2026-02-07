@@ -7,58 +7,72 @@
 			$(document).ready(function(){
         
         // =========================================
-				// Solution 1: Sort and compare
-				// =========================================
-				let permutationBySort = function(s,t) {
-					if (s.length !== t.length) return false;
+        // Solution 1 (BAD): string concatenation
+        // =========================================
+        function compressBad(str) {
+          let compressed = "";
+          let count = 0;
 
-          return s.split('').sort().join('') === t.split('').sort().join('');
-				};
+          for (let i = 0; i < str.length; i++) {
+            count++;
+            if (i + 1 >= str.length || str[i] !== str[i + 1]) {
+              compressed += str[i] + count;
+              count = 0;
+            }
+          }
+          return compressed.length < str.length ? compressed : str;
+        }
 
-				// =========================================
-				// Solution 2: Character count (ASCII)
-				// =========================================
-				let permutationByCount = function(s, t) {
-					if (s.length !== t.length) return false;
+        // =========================================
+        // Solution 2: array builder
+        // =========================================
+        function compress(str) {
+          let result = [];
+          let count = 0;
 
-					const letters = new Array(128).fill(0);
+          for (let i = 0; i < str.length; i++) {
+            count++;
+            if (i + 1 >= str.length || str[i] !== str[i + 1]) {
+              result.push(str[i] + count);
+              count = 0;
+            }
+          }
+          const compressed = result.join('');
+          return compressed.length < str.length ? compressed : str;
+        }
 
-					for (let c of s) {
-						letters[c.charCodeAt(0)]++;
-					}
+        // =========================================
+        // Solution 3: optimized
+        // =========================================
+        function compressOptimized(str) {
+          let finalLength = 0;
+          let count = 0;
 
-					for (let c of t) {
-						letters[c.charCodeAt(0)]--;
-						if (letters[c.charCodeAt(0)] < 0) {
-							return false;
-						}
-					}
-					return true;
-				};
+          for (let i = 0; i < str.length; i++) {
+            count++;
+            if (i + 1 >= str.length || str[i] !== str[i + 1]) {
+              finalLength += 1 + count.toString().length;
+              count = 0;
+            }
+          }
+          if (finalLength >= str.length) return str;
+          return compress(str);
+        }
 
-				// =========================================
-				// Tests
-				// =========================================
-				const tests = [
-					["abc", "bca"],
-					["abc", "abcd"],
-					["God", "dog"],
-					["a b", "b a"]
-				];
+        const tests = ["aabcccccaaa", "abcdef"];
 
-				let output = "<h2>>> CTCI Chapter 1.2 – Check Permutation</h2>";
+        let output = "<h2>>> CTCI Chapter 1.6 – String Compression</h2>";
 
-				output += "<h3>Solution 1: permutationBySort</h3>";
-				tests.forEach(t => {
-					output += `"${t[0]}" vs "${t[1]}" → ${permutationBySort(t[0], t[1])}<br>`;
-				});
+        output += "<h3>Solution 1 (Bad)</h3>";
+        tests.forEach(s => output += `${s} → ${compressBad(s)}<br>`);
 
-				output += "<h3>Solution 2: permutationByCount</h3>";
-				tests.forEach(t => {
-					output += `"${t[0]}" vs "${t[1]}" → ${permutationByCount(t[0], t[1])}<br>`;
-				});
+        output += "<h3>Solution 2</h3>";
+        tests.forEach(s => output += `${s} → ${compress(s)}<br>`);
 
-				$('#t1').html(output);
+        output += "<h3>Solution 3</h3>";
+        tests.forEach(s => output += `${s} → ${compressOptimized(s)}<br>`);
+
+        $('#t1').html(output);
 			});
 
 		</script>
