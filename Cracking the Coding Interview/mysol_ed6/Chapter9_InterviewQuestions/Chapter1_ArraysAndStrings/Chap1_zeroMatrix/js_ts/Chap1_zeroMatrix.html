@@ -100,18 +100,25 @@
             }
         }
 
+        let matrix1 = [
+          [1, 2, 3],
+          [4, 0, 6],
+          [7, 8, 9]
+        ];
 
-        let matrix = [[1,2,3],[4,0,6],[7,8,9]];
-        let matrix2 = JSON.parse(JSON.stringify(matrix));
+        let matrix2 = JSON.parse(JSON.stringify(matrix1));
 
-        setZeros(matrix);
+        let output = "<h2>>> CTCI Chapter 1.8 – Zero Matrix</h2>";
+
+        output += "<b>Original:</b><br>" + JSON.stringify(matrix1) + "<br><br>";
+
+        setZeros(matrix1);
         setZerosOptimized(matrix2);
 
-        $('#t1').html(
-            "<h2>Zero Matrix</h2>" +
-            "Solution1: " + JSON.stringify(matrix) + "<br><br>" +
-            "Solution2: " + JSON.stringify(matrix2)
-        );
+        output += "<b>Solution 1:</b><br>" + JSON.stringify(matrix1) + "<br><br>";
+        output += "<b>Solution 2:</b><br>" + JSON.stringify(matrix2);
+
+        $('#t1').html(output);
 			});
 
 		</script>
