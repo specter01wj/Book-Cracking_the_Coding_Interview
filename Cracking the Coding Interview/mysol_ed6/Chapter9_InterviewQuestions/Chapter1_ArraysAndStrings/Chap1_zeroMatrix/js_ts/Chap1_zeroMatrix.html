@@ -6,39 +6,112 @@
 
 			$(document).ready(function(){
         
-        function rotate(matrix) {
-          const n = matrix.length;
-          for (let layer = 0; layer < n / 2; layer++) {
-            let first = layer;
-            let last = n - 1 - layer;
+        function setZeros(matrix) {
 
-            for (let i = first; i < last; i++) {
-              let offset = i - first;
+            let m = matrix.length;
+            let n = matrix[0].length;
 
-              let top = matrix[first][i];
+            let rows = new Array(m).fill(false);
+            let cols = new Array(n).fill(false);
 
-              matrix[first][i] = matrix[last - offset][first];
-              matrix[last - offset][first] = matrix[last][last - offset];
-              matrix[last][last - offset] = matrix[i][last];
-              matrix[i][last] = top;
+            // Step 1: mark rows and columns
+            for (let i = 0; i < m; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (matrix[i][j] === 0) {
+                        rows[i] = true;
+                        cols[j] = true;
+                    }
+                }
             }
-          }
+
+            // Step 2: nullify matrix
+            for (let i = 0; i < m; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (rows[i] === true || cols[j] === true) {
+                        matrix[i][j] = 0;
+                    }
+                }
+            }
         }
 
-        let matrix = [
-          [1, 2, 3],
-          [4, 5, 6],
-          [7, 8, 9]
-        ];
 
-        let output = "<h2>>> CTCI Chapter 1.7 – Rotate Matrix</h2>";
-        output += "<b>Original:</b><br>" + JSON.stringify(matrix) + "<br><br>";
+        function setZerosOptimized(matrix) {
 
-        rotate(matrix);
+            let m = matrix.length;
+            let n = matrix[0].length;
 
-        output += "<b>Rotated:</b><br>" + JSON.stringify(matrix);
+            let rowZero = false;
+            let colZero = false;
 
-        $('#t1').html(output);
+            // Step 1: check first row
+            for (let j = 0; j < n; j++) {
+                if (matrix[0][j] === 0) {
+                    rowZero = true;
+                }
+            }
+
+            // Step 2: check first column
+            for (let i = 0; i < m; i++) {
+                if (matrix[i][0] === 0) {
+                    colZero = true;
+                }
+            }
+
+            // Step 3: use first row & column as markers
+            for (let i = 1; i < m; i++) {
+                for (let j = 1; j < n; j++) {
+                    if (matrix[i][j] === 0) {
+                        matrix[i][0] = 0;
+                        matrix[0][j] = 0;
+                    }
+                }
+            }
+
+            // Step 4: nullify rows based on first column
+            for (let i = 1; i < m; i++) {
+                if (matrix[i][0] === 0) {
+                    for (let j = 0; j < n; j++) {
+                        matrix[i][j] = 0;
+                    }
+                }
+            }
+
+            // Step 5: nullify columns based on first row
+            for (let j = 1; j < n; j++) {
+                if (matrix[0][j] === 0) {
+                    for (let i = 0; i < m; i++) {
+                        matrix[i][j] = 0;
+                    }
+                }
+            }
+
+            // Step 6: nullify first row if needed
+            if (rowZero === true) {
+                for (let j = 0; j < n; j++) {
+                    matrix[0][j] = 0;
+                }
+            }
+
+            // Step 7: nullify first column if needed
+            if (colZero === true) {
+                for (let i = 0; i < m; i++) {
+                    matrix[i][0] = 0;
+                }
+            }
+        }
+
+
+        let matrix = [[1,2,3],[4,0,6],[7,8,9]];
+        let matrix2 = JSON.parse(JSON.stringify(matrix));
+
+        setZeros(matrix);
+        setZerosOptimized(matrix2);
+
+        $('#t1').html(
+            "<h2>Zero Matrix</h2>" +
+            "Solution1: " + JSON.stringify(matrix) + "<br><br>" +
+            "Solution2: " + JSON.stringify(matrix2)
+        );
 			});
 
 		</script>
