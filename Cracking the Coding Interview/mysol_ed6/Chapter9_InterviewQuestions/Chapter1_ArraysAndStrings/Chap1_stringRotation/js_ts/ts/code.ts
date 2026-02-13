@@ -1,68 +1,41 @@
-// =========================================
-// Solution 1 (BAD)
-// =========================================
-function compressBad(str: string): string {
-    let compressed = "";
-    let count = 0;
+function isSubstring(big: string, small: string): boolean {
 
-    for (let i = 0; i < str.length; i++) {
-        count++;
-        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
-            compressed += str[i] + count;
-            count = 0;
-        }
-    }
-    return compressed.length < str.length ? compressed : str;
+  if (big.indexOf(small) >= 0) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
-// =========================================
-// Solution 2
-// =========================================
-function compress(str: string): string {
-    let result: string[] = [];
-    let count = 0;
+function isRotation(s1: string, s2: string): boolean {
 
-    for (let i = 0; i < str.length; i++) {
-        count++;
-        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
-            result.push(str[i] + count);
-            count = 0;
-        }
-    }
-    const compressed = result.join('');
-    return compressed.length < str.length ? compressed : str;
+  if (s1.length !== s2.length) {
+    return false;
+  }
+
+  const combined: string = s1 + s1;
+
+  return isSubstring(combined, s2);
 }
 
-// =========================================
-// Solution 3
-// =========================================
-function compressOptimized(str: string): string {
-    let finalLength = 0;
-    let count = 0;
-
-    for (let i = 0; i < str.length; i++) {
-        count++;
-        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
-            finalLength += 1 + count.toString().length;
-            count = 0;
-        }
-    }
-    if (finalLength >= str.length) return str;
-    return compress(str);
-}
 
 // Tests
-const tests = ["aabcccccaaa", "abcdef"];
+const tests: [string, string][] = [
+  ["waterbottle", "erbottlewat"],
+  ["hello", "llohe"],
+  ["hello", "lloeh"],
+  ["abc", "cab"],
+  ["abc", "acb"]
+];
 
-let output = ">>> CTCI Chapter 1.6 – String Compression <<<br><br>";
+let output: string = ">>> CTCI Chapter 1.9 – String Rotation <<<br><br>";
 
-output += "<b>Solution 1 (Bad)</b><br>";
-tests.forEach(s => output += `${s} → ${compressBad(s)}<br>`);
+output += "<b>Solution</b><br>";
 
-output += "<br><b>Solution 2</b><br>";
-tests.forEach(s => output += `${s} → ${compress(s)}<br>`);
-
-output += "<br><b>Solution 3</b><br>";
-tests.forEach(s => output += `${s} → ${compressOptimized(s)}<br>`);
+tests.forEach(pair => {
+  const s1: string = pair[0];
+  const s2: string = pair[1];
+  output += `${s1} , ${s2} → ${isRotation(s1, s2)}<br>`;
+});
 
 (document.querySelector('#t1') as HTMLElement).innerHTML = output;
