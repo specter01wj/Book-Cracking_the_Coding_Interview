@@ -1,68 +1,104 @@
-// =========================================
-// Solution 1 (BAD)
-// =========================================
-function compressBad(str: string): string {
-    let compressed = "";
-    let count = 0;
+class LinkedListNode {
+    data: number;
+    next: LinkedListNode | null = null;
 
-    for (let i = 0; i < str.length; i++) {
-        count++;
-        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
-            compressed += str[i] + count;
-            count = 0;
-        }
+    constructor(data: number) {
+        this.data = data;
     }
-    return compressed.length < str.length ? compressed : str;
 }
 
-// =========================================
-// Solution 2
-// =========================================
-function compress(str: string): string {
-    let result: string[] = [];
-    let count = 0;
+class Chap2_removeDups {
 
-    for (let i = 0; i < str.length; i++) {
-        count++;
-        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
-            result.push(str[i] + count);
-            count = 0;
+    deleteDups(head: LinkedListNode | null): void {
+
+        const set = new Set<number>();
+
+        let previous: LinkedListNode | null = null;
+        let current = head;
+
+        while (current) {
+
+            if (set.has(current.data)) {
+                previous!.next = current.next;
+            } else {
+                set.add(current.data);
+                previous = current;
+            }
+
+            current = current.next;
         }
     }
-    const compressed = result.join('');
-    return compressed.length < str.length ? compressed : str;
-}
 
-// =========================================
-// Solution 3
-// =========================================
-function compressOptimized(str: string): string {
-    let finalLength = 0;
-    let count = 0;
+    deleteDupsNoBuffer(head: LinkedListNode | null): void {
 
-    for (let i = 0; i < str.length; i++) {
-        count++;
-        if (i + 1 >= str.length || str[i] !== str[i + 1]) {
-            finalLength += 1 + count.toString().length;
-            count = 0;
+        let current = head;
+
+        while (current) {
+
+            let runner = current;
+
+            while (runner.next) {
+
+                if (runner.next.data === current.data) {
+                    runner.next = runner.next.next;
+                } else {
+                    runner = runner.next;
+                }
+            }
+
+            current = current.next;
         }
     }
-    if (finalLength >= str.length) return str;
-    return compress(str);
+
+    buildList(...values: number[]): LinkedListNode | null {
+
+        if (values.length === 0) return null;
+
+        const head = new LinkedListNode(values[0]);
+        let current = head;
+
+        for (let i = 1; i < values.length; i++) {
+            current.next = new LinkedListNode(values[i]);
+            current = current.next;
+        }
+
+        return head;
+    }
+
+    listToString(head: LinkedListNode | null): string {
+
+        if (!head) return "Empty";
+
+        const arr: number[] = [];
+
+        while (head) {
+            arr.push(head.data);
+            head = head.next;
+        }
+
+        return arr.join(" -> ");
+    }
 }
 
-// Tests
-const tests = ["aabcccccaaa", "abcdef"];
+const test = new Chap2_removeDups();
 
-let output = ">>> CTCI Chapter 1.6 – String Compression <<<br><br>";
+let output = ">>> CTCI Chapter 2.1 - Remove Dups <<<br><br>";
 
-output += "<b>Solution 1 (Bad)</b><br>";
-tests.forEach(s => output += `${s} → ${compressBad(s)}<br>`);
+const list1 = test.buildList(1,2,3,2,4,3,5,1);
 
-output += "<br><b>Solution 2</b><br>";
-tests.forEach(s => output += `${s} → ${compress(s)}<br>`);
+output += "<b>Original</b><br>";
+output += test.listToString(list1) + "<br>";
 
-output += "<br><b>Solution 3</b><br>";
-tests.forEach(s => output += `${s} → ${compressOptimized(s)}<br>`);
+test.deleteDups(list1);
 
-(document.querySelector('#t1') as HTMLElement).innerHTML = output;
+output += "<b>deleteDups</b><br>";
+output += test.listToString(list1) + "<br><br>";
+
+const list2 = test.buildList(1,2,3,2,4,3,5,1);
+
+test.deleteDupsNoBuffer(list2);
+
+output += "<b>deleteDupsNoBuffer</b><br>";
+output += test.listToString(list2);
+
+(document.querySelector("#t1") as HTMLElement).innerHTML = output;
