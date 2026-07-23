@@ -4,50 +4,100 @@ class LinkedListNode {
         this.data = data;
         this.next = null;
     }
+
 }
 
-class Chap2_removeDups {
+class Index {
 
-    deleteDups(head) {
-
-        const set = new Set();
-
-        let previous = null;
-        let current = head;
-
-        while (current) {
-
-            if (set.has(current.data)) {
-                previous.next = current.next;
-            } else {
-                set.add(current.data);
-                previous = current;
-            }
-
-            current = current.next;
-        }
+    constructor() {
+        this.value = 0;
     }
 
-    deleteDupsNoBuffer(head) {
+}
 
-        let current = head;
+class Chap2_returnKthToLast {
 
-        while (current) {
+    //====================================================
+    // Solution 1 (Book)
+    //====================================================
 
-            let runner = current;
+    printKthToLast(head, k) {
 
-            while (runner.next) {
+        if (head === null) {
+            return 0;
+        }
 
-                if (runner.next.data === current.data) {
-                    runner.next = runner.next.next;
-                } else {
-                    runner = runner.next;
-                }
+        const index = this.printKthToLast(head.next, k) + 1;
+
+        if (index === k) {
+            output += `k = ${k} : ${head.data}<br>`;
+        }
+
+        return index;
+    }
+
+    //====================================================
+    // Solution 2 (Book)
+    //====================================================
+
+    kthToLast(head, k) {
+
+        const idx = new Index();
+
+        return this.kthToLastHelper(head, k, idx);
+    }
+
+    kthToLastHelper(head, k, idx) {
+
+        if (head === null) {
+            return null;
+        }
+
+        const node = this.kthToLastHelper(head.next, k, idx);
+
+        idx.value++;
+
+        if (idx.value === k) {
+            return head;
+        }
+
+        return node;
+    }
+
+    //====================================================
+    // Solution 3 (Book)
+    //====================================================
+
+    nthToLast(head, k) {
+
+        if (head === null || k <= 0) {
+            return null;
+        }
+
+        let p1 = head;
+        let p2 = head;
+
+        for (let i = 0; i < k; i++) {
+
+            if (p1 === null) {
+                return null;
             }
 
-            current = current.next;
+            p1 = p1.next;
         }
+
+        while (p1 !== null) {
+
+            p1 = p1.next;
+            p2 = p2.next;
+        }
+
+        return p2;
     }
+
+    //====================================================
+    // Helpers
+    //====================================================
 
     buildList(...values) {
 
@@ -59,6 +109,7 @@ class Chap2_removeDups {
         let current = head;
 
         for (let i = 1; i < values.length; i++) {
+
             current.next = new LinkedListNode(values[i]);
             current = current.next;
         }
@@ -75,66 +126,67 @@ class Chap2_removeDups {
         const result = [];
 
         while (head !== null) {
+
             result.push(head.data);
             head = head.next;
         }
 
         return result.join(" -> ");
     }
+
 }
 
-const test = new Chap2_removeDups();
+const test = new Chap2_returnKthToLast();
 
-let output = ">>> CTCI Chapter 2.1 - Remove Dups <<<br><br>";
+let output = ">>> CTCI Chapter 2.2 - Return Kth To Last <<<br><br>";
 
-output += "<b>========== Solution 1 : deleteDups (HashSet) ==========</b><br><br>";
+const list = test.buildList(10, 20, 30, 40, 50, 60, 70);
 
-let list = test.buildList(1, 2, 3, 2, 4, 3, 5, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+output += `Linked List : ${test.listToString(list)}<br><br>`;
 
-list = test.buildList(1, 1, 1, 1, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+output += "<b>========== Solution 1 : printKthToLast ==========</b><br><br>";
 
-list = test.buildList(1, 2, 3, 4, 5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+for (let k = 1; k <= 8; k++) {
 
-list = test.buildList(5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+    const before = output.length;
 
-list = test.buildList();
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+    test.printKthToLast(list, k);
 
-list = test.buildList(-1, 3, -1, 4, 3, 5, 5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+    if (output.length === before) {
+        output += `k = ${k} : null<br>`;
+    }
+}
 
-output += "<b>========== Solution 2 : deleteDupsNoBuffer ==========</b><br><br>";
+output += "<br><b>========== Solution 2 : kthToLast (Recursive Wrapper) ==========</b><br><br>";
 
-list = test.buildList(1, 2, 3, 2, 4, 3, 5, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDupsNoBuffer(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+for (let k = 1; k <= 8; k++) {
 
-list = test.buildList(1, 1, 1, 1, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDupsNoBuffer(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+    const node = test.kthToLast(list, k);
 
-list = test.buildList(1, 2, 3, 4, 5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDupsNoBuffer(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+    output += `k = ${k} : ${node ? node.data : "null"}<br>`;
+}
+
+output += "<br><b>========== Solution 3 : nthToLast (Two Pointers) ==========</b><br><br>";
+
+for (let k = 1; k <= 8; k++) {
+
+    const node = test.nthToLast(list, k);
+
+    output += `k = ${k} : ${node ? node.data : "null"}<br>`;
+}
+
+output += "<br><b>========== Edge Cases ==========</b><br><br>";
+
+const single = test.buildList(100);
+
+output += `Single Node : ${test.listToString(single)}<br>`;
+output += `k = 1 : ${test.nthToLast(single, 1).data}<br>`;
+output += `k = 2 : ${test.nthToLast(single, 2)}<br><br>`;
+
+const empty = test.buildList();
+
+output += `Empty List : ${test.listToString(empty)}<br>`;
+output += `k = 1 : ${test.nthToLast(empty, 1)}<br><br>`;
 
 output += "<b>Study Complete.</b>";
 
