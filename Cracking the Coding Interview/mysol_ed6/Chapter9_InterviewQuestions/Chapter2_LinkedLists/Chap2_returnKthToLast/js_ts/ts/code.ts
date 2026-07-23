@@ -1,63 +1,115 @@
 class LinkedListNode {
+
     data: number;
     next: LinkedListNode | null = null;
 
     constructor(data: number) {
         this.data = data;
     }
+
 }
 
-class Chap2_removeDups {
+class Index {
 
-    deleteDups(head: LinkedListNode | null): void {
+    value: number = 0;
 
-        const set = new Set<number>();
+}
 
-        let previous: LinkedListNode | null = null;
-        let current = head;
+class Chap2_returnKthToLast {
 
-        while (current) {
+    //====================================================
+    // Solution 1 (Book)
+    //====================================================
 
-            if (set.has(current.data)) {
-                previous!.next = current.next;
-            } else {
-                set.add(current.data);
-                previous = current;
-            }
+    printKthToLast(head: LinkedListNode | null, k: number): number {
 
-            current = current.next;
+        if (head === null) {
+            return 0;
         }
+
+        const index = this.printKthToLast(head.next, k) + 1;
+
+        if (index === k) {
+            output += `k = ${k} : ${head.data}<br>`;
+        }
+
+        return index;
     }
 
-    deleteDupsNoBuffer(head: LinkedListNode | null): void {
+    //====================================================
+    // Solution 2 (Book)
+    //====================================================
 
-        let current = head;
+    kthToLast(head: LinkedListNode | null, k: number): LinkedListNode | null {
 
-        while (current) {
+        const idx = new Index();
 
-            let runner = current;
+        return this.kthToLastHelper(head, k, idx);
+    }
 
-            while (runner.next) {
+    kthToLastHelper(head: LinkedListNode | null, k: number, idx: Index): LinkedListNode | null {
 
-                if (runner.next.data === current.data) {
-                    runner.next = runner.next.next;
-                } else {
-                    runner = runner.next;
-                }
+        if (head === null) {
+            return null;
+        }
+
+        const node = this.kthToLastHelper(head.next, k, idx);
+
+        idx.value++;
+
+        if (idx.value === k) {
+            return head;
+        }
+
+        return node;
+    }
+
+    //====================================================
+    // Solution 3 (Book)
+    //====================================================
+
+    nthToLast(head: LinkedListNode | null, k: number): LinkedListNode | null {
+
+        if (head === null || k <= 0) {
+            return null;
+        }
+
+        let p1: LinkedListNode | null = head;
+        let p2: LinkedListNode | null = head;
+
+        for (let i = 0; i < k; i++) {
+
+            if (p1 === null) {
+                return null;
             }
 
-            current = current.next;
+            p1 = p1.next;
         }
+
+        while (p1 !== null) {
+
+            p1 = p1.next;
+            p2 = p2!.next;
+        }
+
+        return p2;
     }
+
+    //====================================================
+    // Helpers
+    //====================================================
 
     buildList(...values: number[]): LinkedListNode | null {
 
-        if (values.length === 0) return null;
+        if (values.length === 0) {
+            return null;
+        }
 
         const head = new LinkedListNode(values[0]);
         let current = head;
 
         for (let i = 1; i < values.length; i++) {
+
             current.next = new LinkedListNode(values[i]);
             current = current.next;
         }
@@ -67,38 +119,75 @@ class Chap2_removeDups {
 
     listToString(head: LinkedListNode | null): string {
 
-        if (!head) return "Empty";
+        if (head === null) {
+            return "Empty";
+        }
 
-        const arr: number[] = [];
+        const result: number[] = [];
 
-        while (head) {
-            arr.push(head.data);
+        while (head !== null) {
+
+            result.push(head.data);
             head = head.next;
         }
 
-        return arr.join(" -> ");
+        return result.join(" -> ");
+    }
+
+}
+
+const test = new Chap2_returnKthToLast();
+
+let output = ">>> CTCI Chapter 2.2 - Return Kth To Last <<<br><br>";
+
+const list = test.buildList(10, 20, 30, 40, 50, 60, 70);
+
+output += `Linked List : ${test.listToString(list)}<br><br>`;
+
+output += "<b>========== Solution 1 : printKthToLast ==========</b><br><br>";
+
+for (let k = 1; k <= 8; k++) {
+
+    const before = output.length;
+
+    test.printKthToLast(list, k);
+
+    if (output.length === before) {
+        output += `k = ${k} : null<br>`;
     }
 }
 
-const test = new Chap2_removeDups();
+output += "<br><b>========== Solution 2 : kthToLast (Recursive Wrapper) ==========</b><br><br>";
 
-let output = ">>> CTCI Chapter 2.1 - Remove Dups <<<br><br>";
+for (let k = 1; k <= 8; k++) {
 
-const list1 = test.buildList(1,2,3,2,4,3,5,1);
+    const node = test.kthToLast(list, k);
 
-output += "<b>Original</b><br>";
-output += test.listToString(list1) + "<br>";
+    output += `k = ${k} : ${node ? node.data : "null"}<br>`;
+}
 
-test.deleteDups(list1);
+output += "<br><b>========== Solution 3 : nthToLast (Two Pointers) ==========</b><br><br>";
 
-output += "<b>deleteDups</b><br>";
-output += test.listToString(list1) + "<br><br>";
+for (let k = 1; k <= 8; k++) {
 
-const list2 = test.buildList(1,2,3,2,4,3,5,1);
+    const node = test.nthToLast(list, k);
 
-test.deleteDupsNoBuffer(list2);
+    output += `k = ${k} : ${node ? node.data : "null"}<br>`;
+}
 
-output += "<b>deleteDupsNoBuffer</b><br>";
-output += test.listToString(list2);
+output += "<br><b>========== Edge Cases ==========</b><br><br>";
+
+const single = test.buildList(100);
+
+output += `Single Node : ${test.listToString(single)}<br>`;
+output += `k = 1 : ${test.nthToLast(single, 1)?.data}<br>`;
+output += `k = 2 : ${test.nthToLast(single, 2)}<br><br>`;
+
+const empty = test.buildList();
+
+output += `Empty List : ${test.listToString(empty)}<br>`;
+output += `k = 1 : ${test.nthToLast(empty, 1)}<br><br>`;
+
+output += "<b>Study Complete.</b>";
 
 (document.querySelector("#t1") as HTMLElement).innerHTML = output;
