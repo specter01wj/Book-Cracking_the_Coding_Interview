@@ -7,22 +7,97 @@ class LinkedListNode {
 
 }
 
-class Chap2_deleteMiddleNode {
+class Chap2_partition {
 
     //====================================================
-    // Book Solution
+    // Solution 1 (Book)
     //====================================================
 
-    deleteNode(node) {
+    partition(node, x) {
 
-        if (node === null || node.next === null) {
-            return false;
+        let beforeStart = null;
+        let beforeEnd = null;
+        let afterStart = null;
+        let afterEnd = null;
+
+        while (node !== null) {
+
+            const next = node.next;
+            node.next = null;
+
+            if (node.data < x) {
+
+                if (beforeStart === null) {
+
+                    beforeStart = node;
+                    beforeEnd = beforeStart;
+
+                } else {
+
+                    beforeEnd.next = node;
+                    beforeEnd = node;
+                }
+
+            } else {
+
+                if (afterStart === null) {
+
+                    afterStart = node;
+                    afterEnd = afterStart;
+
+                } else {
+
+                    afterEnd.next = node;
+                    afterEnd = node;
+                }
+            }
+
+            node = next;
         }
 
-        node.data = node.next.data;
-        node.next = node.next.next;
+        if (beforeStart === null) {
+            return afterStart;
+        }
 
-        return true;
+        beforeEnd.next = afterStart;
+
+        return beforeStart;
+    }
+
+    //====================================================
+    // Solution 2 (Book)
+    //====================================================
+
+    partition2(node, x) {
+
+        if (node === null) {
+            return null;
+        }
+
+        let head = node;
+        let tail = node;
+
+        while (node !== null) {
+
+            const next = node.next;
+
+            if (node.data < x) {
+
+                node.next = head;
+                head = node;
+
+            } else {
+
+                tail.next = node;
+                tail = node;
+            }
+
+            node = next;
+        }
+
+        tail.next = null;
+
+        return head;
     }
 
     //====================================================
@@ -47,20 +122,6 @@ class Chap2_deleteMiddleNode {
         return head;
     }
 
-    findNode(head, value) {
-
-        while (head !== null) {
-
-            if (head.data === value) {
-                return head;
-            }
-
-            head = head.next;
-        }
-
-        return null;
-    }
-
     listToString(head) {
 
         if (head === null) {
@@ -80,57 +141,63 @@ class Chap2_deleteMiddleNode {
 
 }
 
-const test = new Chap2_deleteMiddleNode();
+const test = new Chap2_partition();
 
-let output = ">>> CTCI Chapter 2.3 - Delete Middle Node <<<br><br>";
+let output = ">>> CTCI Chapter 2.4 - Partition <<<br><br>";
 
-output += "<b>========== Test 1 : Delete Middle Node ==========</b><br><br>";
+output += "<b>========== Solution 1 : Stable Partition ==========</b><br><br>";
 
-let list = test.buildList("a", "b", "c", "d", "e", "f");
-
-output += `Original : ${test.listToString(list)}<br>`;
-
-let node = test.findNode(list, "c");
-
-output += `Delete Node : ${node.data}<br>`;
-output += `Success : ${test.deleteNode(node)}<br>`;
-output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
-
-output += "<b>========== Test 2 : Delete Another Middle Node ==========</b><br><br>";
-
-list = test.buildList("a", "b", "c", "d", "e", "f");
+let list = test.buildList(3, 5, 8, 5, 10, 2, 1);
 
 output += `Original : ${test.listToString(list)}<br>`;
 
-node = test.findNode(list, "e");
+list = test.partition(list, 5);
 
-output += `Delete Node : ${node.data}<br>`;
-output += `Success : ${test.deleteNode(node)}<br>`;
+output += "Partition = 5<br>";
 output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
 
-output += "<b>========== Test 3 : Last Node ==========</b><br><br>";
+output += "<b>========== Solution 2 : Head / Tail ==========</b><br><br>";
 
-list = test.buildList("a", "b", "c");
+list = test.buildList(3, 5, 8, 5, 10, 2, 1);
 
 output += `Original : ${test.listToString(list)}<br>`;
 
-node = test.findNode(list, "c");
+list = test.partition2(list, 5);
 
-output += `Delete Node : ${node.data}<br>`;
-output += `Success : ${test.deleteNode(node)}<br>`;
+output += "Partition = 5<br>";
 output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
 
-output += "<b>========== Test 4 : Single Node ==========</b><br><br>";
+output += "<b>========== More Tests ==========</b><br><br>";
 
-list = test.buildList("x");
+list = test.buildList(1, 2, 3, 4);
 
 output += `Original : ${test.listToString(list)}<br>`;
-output += `Success : ${test.deleteNode(list)}<br>`;
+list = test.partition(list, 5);
 output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
 
-output += "<b>========== Test 5 : Null ==========</b><br><br>";
+list = test.buildList(9, 8, 7, 6);
 
-output += `Success : ${test.deleteNode(null)}<br><br>`;
+output += `Original : ${test.listToString(list)}<br>`;
+list = test.partition(list, 5);
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
+
+list = test.buildList(5, 5, 5, 5);
+
+output += `Original : ${test.listToString(list)}<br>`;
+list = test.partition(list, 5);
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
+
+list = test.buildList(2);
+
+output += `Original : ${test.listToString(list)}<br>`;
+list = test.partition(list, 5);
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
+
+list = test.buildList();
+
+output += `Original : ${test.listToString(list)}<br>`;
+list = test.partition(list, 5);
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
 
 output += "<b>Study Complete.</b>";
 
