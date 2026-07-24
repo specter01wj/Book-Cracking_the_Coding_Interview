@@ -195,3 +195,81 @@ let result = test.addLists(l1, l2, 0);
 
 output += `Result: ${test.listToString(result)}<br><br>`;
 
+l1 = test.buildList(9, 9, 9);
+l2 = test.buildList(1);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+result = test.addLists(l1, l2, 0);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(0);
+l2 = test.buildList(0);
+
+result = test.addLists(l1, l2, 0);
+
+output += `0 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(1, 8);
+l2 = test.buildList(0);
+
+result = test.addLists(l1, l2, 0);
+
+output += `18 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = null;
+l2 = test.buildList(5, 4);
+
+result = test.addLists(l1, l2, 0);
+
+output += `Empty + List : ${test.listToString(result)}<br><br>`;
+
+//====================================================
+// Solution 2
+//====================================================
+
+output += "<b>========== Solution 2 : Forward Order ==========</b><br><br>";
+
+l1 = test.buildList(6, 1, 7);
+l2 = test.buildList(2, 9, 5);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+result = test.addLists2(l1, l2);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(9, 9, 9);
+l2 = test.buildList(1);
+
+result = test.addLists2(l1, l2);
+
+output += `999 + 1 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(1, 2, 3, 4);
+l2 = test.buildList(5, 6, 7);
+
+result = test.addLists2(l1, l2);
+
+output += `1234 + 567 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(0);
+l2 = test.buildList(0);
+
+result = test.addLists2(l1, l2);
+
+output += `0 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = null;
+l2 = test.buildList(5, 4);
+
+result = test.addLists2(l1, l2);
+
+output += `Empty + List : ${test.listToString(result)}<br><br>`;
+
+output += "<b>Study Complete.</b>";
+
+document.querySelector("#t1").innerHTML = output;
