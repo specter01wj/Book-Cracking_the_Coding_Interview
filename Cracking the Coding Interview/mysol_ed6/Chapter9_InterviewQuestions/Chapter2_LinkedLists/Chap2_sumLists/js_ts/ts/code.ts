@@ -1,58 +1,32 @@
 class LinkedListNode {
+
     data: number;
     next: LinkedListNode | null = null;
 
     constructor(data: number) {
         this.data = data;
     }
+
 }
 
-class Chap2_removeDups {
+class PartialSum {
 
-    deleteDups(head: LinkedListNode | null): void {
+    sum: LinkedListNode | null = null;
+    carry: number = 0;
 
-        const set = new Set<number>();
+}
 
-        let previous: LinkedListNode | null = null;
-        let current = head;
+class Chap2_sumLists {
 
-        while (current) {
-
-            if (set.has(current.data)) {
-                previous!.next = current.next;
-            } else {
-                set.add(current.data);
-                previous = current;
-            }
-
-            current = current.next;
-        }
-    }
-
-    deleteDupsNoBuffer(head: LinkedListNode | null): void {
-
-        let current = head;
-
-        while (current) {
-
-            let runner = current;
-
-            while (runner.next) {
-
-                if (runner.next.data === current.data) {
-                    runner.next = runner.next.next;
-                } else {
-                    runner = runner.next;
-                }
-            }
-
-            current = current.next;
-        }
-    }
+    //====================================================
+    // Helpers
+    //====================================================
 
     buildList(...values: number[]): LinkedListNode | null {
 
-        if (values.length === 0) return null;
+        if (values.length === 0) {
+            return null;
+        }
 
         const head = new LinkedListNode(values[0]);
         let current = head;
@@ -67,38 +41,205 @@ class Chap2_removeDups {
 
     listToString(head: LinkedListNode | null): string {
 
-        if (!head) return "Empty";
+        if (head === null) {
+            return "Empty";
+        }
 
-        const arr: number[] = [];
+        const result: number[] = [];
 
-        while (head) {
-            arr.push(head.data);
+        while (head !== null) {
+            result.push(head.data);
             head = head.next;
         }
 
-        return arr.join(" -> ");
+        return result.join(" -> ");
+    }
+
+}
+
+const test = new Chap2_sumLists();
+
+let output = ">>> CTCI Chapter 2.5 - Sum Lists <<<br><br>";
+
+//
+// Solution 1
+//
+
+output += "<b>========== Solution 1 : Reverse Order ==========</b><br><br>";
+
+let l1 = test.buildList(7, 1, 6);
+let l2 = test.buildList(5, 9, 2);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+let result = test.addLists(l1, l2, 0);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(9, 9, 9);
+l2 = test.buildList(1);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+result = test.addLists(l1, l2, 0);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(0);
+l2 = test.buildList(0);
+
+result = test.addLists(l1, l2, 0);
+
+output += `0 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(1, 8);
+l2 = test.buildList(0);
+
+result = test.addLists(l1, l2, 0);
+
+output += `18 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = null;
+l2 = test.buildList(5, 4);
+
+result = test.addLists(l1, l2, 0);
+
+output += `Empty + List : ${test.listToString(result)}<br><br>`;
+
+//
+// Solution 2
+//
+
+output += "<b>========== Solution 2 : Forward Order ==========</b><br><br>";
+
+l1 = test.buildList(6, 1, 7);
+l2 = test.buildList(2, 9, 5);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+result = test.addLists2(l1, l2);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(9, 9, 9);
+l2 = test.buildList(1);
+
+result = test.addLists2(l1, l2);
+
+output += `999 + 1 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(1, 2, 3, 4);
+l2 = test.buildList(5, 6, 7);
+
+result = test.addLists2(l1, l2);
+
+output += `1234 + 567 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(0);
+l2 = test.buildList(0);
+
+result = test.addLists2(l1, l2);
+
+output += `0 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = null;
+l2 = test.buildList(5, 4);
+
+result = test.addLists2(l1, l2);
+
+output += `Empty + List : ${test.listToString(result)}<br><br>`;
+
+output += "<b>Study Complete.</b>";
+
+//====================================================
+// Solution 1 (Book)
+// Digits stored in reverse order
+//====================================================
+
+addLists(
+    l1: LinkedListNode | null,
+    l2: LinkedListNode | null,
+    carry: number
+): LinkedListNode | null {
+
+    if (l1 === null && l2 === null && carry === 0) {
+        return null;
+    }
+
+    let value = carry;
+
+    if (l1 !== null) {
+        value += l1.data;
+    }
+
+    if (l2 !== null) {
+        value += l2.data;
+    }
+
+    const result = new LinkedListNode(value % 10);
+
+    if (l1 !== null || l2 !== null) {
+
+        result.next = this.addLists(
+            l1 === null ? null : l1.next,
+            l2 === null ? null : l2.next,
+            value >= 10 ? 1 : 0
+        );
+    }
+
+    return result;
+}
+
+//====================================================
+// Solution 2 (Book Follow Up)
+// Digits stored in forward order
+//====================================================
+
+addLists2(
+    l1: LinkedListNode | null,
+    l2: LinkedListNode | null
+): LinkedListNode | null {
+
+    const len1 = this.length(l1);
+    const len2 = this.length(l2);
+
+    // Pad the shorter list with zeros.
+    if (len1 < len2) {
+        l1 = this.padList(l1, len2 - len1);
+    } else if (len2 < len1) {
+        l2 = this.padList(l2, len1 - len2);
+    }
+
+    const sum = this.addListsHelper(l1, l2);
+
+    if (sum.carry === 0) {
+        return sum.sum;
+    } else {
+        return this.insertBefore(sum.sum, sum.carry);
     }
 }
 
-const test = new Chap2_removeDups();
+private addListsHelper(
+    l1: LinkedListNode | null,
+    l2: LinkedListNode | null
+): PartialSum {
 
-let output = ">>> CTCI Chapter 2.1 - Remove Dups <<<br><br>";
+    if (l1 === null && l2 === null) {
+        return new PartialSum();
+    }
 
-const list1 = test.buildList(1,2,3,2,4,3,5,1);
+    const sum = this.addListsHelper(l1!.next, l2!.next);
 
-output += "<b>Original</b><br>";
-output += test.listToString(list1) + "<br>";
+    const val = sum.carry + l1!.data + l2!.data;
 
-test.deleteDups(list1);
+    const fullResult = this.insertBefore(sum.sum, val % 10);
 
-output += "<b>deleteDups</b><br>";
-output += test.listToString(list1) + "<br><br>";
+    sum.sum = fullResult;
+    sum.carry = Math.floor(val / 10);
 
-const list2 = test.buildList(1,2,3,2,4,3,5,1);
+    return sum;
+}
 
-test.deleteDupsNoBuffer(list2);
-
-output += "<b>deleteDupsNoBuffer</b><br>";
-output += test.listToString(list2);
-
-(document.querySelector("#t1") as HTMLElement).innerHTML = output;
