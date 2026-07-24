@@ -4,50 +4,23 @@ class LinkedListNode {
         this.data = data;
         this.next = null;
     }
+
 }
 
-class Chap2_removeDups {
+class PartialSum {
 
-    deleteDups(head) {
-
-        const set = new Set();
-
-        let previous = null;
-        let current = head;
-
-        while (current) {
-
-            if (set.has(current.data)) {
-                previous.next = current.next;
-            } else {
-                set.add(current.data);
-                previous = current;
-            }
-
-            current = current.next;
-        }
+    constructor() {
+        this.sum = null;
+        this.carry = 0;
     }
 
-    deleteDupsNoBuffer(head) {
+}
 
-        let current = head;
+class Chap2_sumLists {
 
-        while (current) {
-
-            let runner = current;
-
-            while (runner.next) {
-
-                if (runner.next.data === current.data) {
-                    runner.next = runner.next.next;
-                } else {
-                    runner = runner.next;
-                }
-            }
-
-            current = current.next;
-        }
-    }
+    //====================================================
+    // Helpers
+    //====================================================
 
     buildList(...values) {
 
@@ -81,61 +54,144 @@ class Chap2_removeDups {
 
         return result.join(" -> ");
     }
+
+    //====================================================
+    // Solution 1 (Book)
+    // Digits stored in reverse order
+    //====================================================
+
+    addLists(l1, l2, carry) {
+
+        if (l1 === null && l2 === null && carry === 0) {
+            return null;
+        }
+
+        let value = carry;
+
+        if (l1 !== null) {
+            value += l1.data;
+        }
+
+        if (l2 !== null) {
+            value += l2.data;
+        }
+
+        const result = new LinkedListNode(value % 10);
+
+        if (l1 !== null || l2 !== null) {
+
+            result.next = this.addLists(
+                l1 === null ? null : l1.next,
+                l2 === null ? null : l2.next,
+                value >= 10 ? 1 : 0
+            );
+
+        }
+
+        return result;
+    }
+
+    //====================================================
+    // Solution 2 (Book Follow Up)
+    // Digits stored in forward order
+    //====================================================
+
+    addLists2(l1, l2) {
+
+        const len1 = this.length(l1);
+        const len2 = this.length(l2);
+
+        if (len1 < len2) {
+            l1 = this.padList(l1, len2 - len1);
+        } else if (len2 < len1) {
+            l2 = this.padList(l2, len1 - len2);
+        }
+
+        const sum = this.addListsHelper(l1, l2);
+
+        if (sum.carry === 0) {
+            return sum.sum;
+        } else {
+            return this.insertBefore(sum.sum, sum.carry);
+        }
+
+    }
+
+    addListsHelper(l1, l2) {
+
+        if (l1 === null && l2 === null) {
+            return new PartialSum();
+        }
+
+        const sum = this.addListsHelper(l1.next, l2.next);
+
+        const val = sum.carry + l1.data + l2.data;
+
+        const fullResult = this.insertBefore(sum.sum, val % 10);
+
+        sum.sum = fullResult;
+        sum.carry = Math.floor(val / 10);
+
+        return sum;
+    }
+
+    //====================================================
+    // Helpers for Solution 2
+    //====================================================
+
+    padList(l, padding) {
+
+        let head = l;
+
+        for (let i = 0; i < padding; i++) {
+            head = this.insertBefore(head, 0);
+        }
+
+        return head;
+    }
+
+    insertBefore(list, data) {
+
+        const node = new LinkedListNode(data);
+
+        if (list !== null) {
+            node.next = list;
+        }
+
+        return node;
+    }
+
+    length(head) {
+
+        let size = 0;
+
+        while (head !== null) {
+            size++;
+            head = head.next;
+        }
+
+        return size;
+    }
+
 }
 
-const test = new Chap2_removeDups();
+const test = new Chap2_sumLists();
 
-let output = ">>> CTCI Chapter 2.1 - Remove Dups <<<br><br>";
+let output = ">>> CTCI Chapter 2.5 - Sum Lists <<<br><br>";
 
-output += "<b>========== Solution 1 : deleteDups (HashSet) ==========</b><br><br>";
+//====================================================
+// Solution 1
+//====================================================
 
-let list = test.buildList(1, 2, 3, 2, 4, 3, 5, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+output += "<b>========== Solution 1 : Reverse Order ==========</b><br><br>";
 
-list = test.buildList(1, 1, 1, 1, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+let l1 = test.buildList(7, 1, 6);
+let l2 = test.buildList(5, 9, 2);
 
-list = test.buildList(1, 2, 3, 4, 5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
 
-list = test.buildList(5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+let result = test.addLists(l1, l2, 0);
 
-list = test.buildList();
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
+output += `Result: ${test.listToString(result)}<br><br>`;
 
-list = test.buildList(-1, 3, -1, 4, 3, 5, 5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDups(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
-
-output += "<b>========== Solution 2 : deleteDupsNoBuffer ==========</b><br><br>";
-
-list = test.buildList(1, 2, 3, 2, 4, 3, 5, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDupsNoBuffer(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
-
-list = test.buildList(1, 1, 1, 1, 1);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDupsNoBuffer(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
-
-list = test.buildList(1, 2, 3, 4, 5);
-output += "Original : " + test.listToString(list) + "<br>";
-test.deleteDupsNoBuffer(list);
-output += "Result&nbsp;&nbsp;&nbsp;&nbsp;: " + test.listToString(list) + "<br><br>";
-
-output += "<b>Study Complete.</b>";
-
-document.querySelector("#t1").innerHTML = output;
