@@ -55,105 +55,6 @@ class Chap2_sumLists {
         return result.join(" -> ");
     }
 
-}
-
-const test = new Chap2_sumLists();
-
-let output = ">>> CTCI Chapter 2.5 - Sum Lists <<<br><br>";
-
-//
-// Solution 1
-//
-
-output += "<b>========== Solution 1 : Reverse Order ==========</b><br><br>";
-
-let l1 = test.buildList(7, 1, 6);
-let l2 = test.buildList(5, 9, 2);
-
-output += `List1 : ${test.listToString(l1)}<br>`;
-output += `List2 : ${test.listToString(l2)}<br>`;
-
-let result = test.addLists(l1, l2, 0);
-
-output += `Result: ${test.listToString(result)}<br><br>`;
-
-l1 = test.buildList(9, 9, 9);
-l2 = test.buildList(1);
-
-output += `List1 : ${test.listToString(l1)}<br>`;
-output += `List2 : ${test.listToString(l2)}<br>`;
-
-result = test.addLists(l1, l2, 0);
-
-output += `Result: ${test.listToString(result)}<br><br>`;
-
-l1 = test.buildList(0);
-l2 = test.buildList(0);
-
-result = test.addLists(l1, l2, 0);
-
-output += `0 + 0 : ${test.listToString(result)}<br><br>`;
-
-l1 = test.buildList(1, 8);
-l2 = test.buildList(0);
-
-result = test.addLists(l1, l2, 0);
-
-output += `18 + 0 : ${test.listToString(result)}<br><br>`;
-
-l1 = null;
-l2 = test.buildList(5, 4);
-
-result = test.addLists(l1, l2, 0);
-
-output += `Empty + List : ${test.listToString(result)}<br><br>`;
-
-//
-// Solution 2
-//
-
-output += "<b>========== Solution 2 : Forward Order ==========</b><br><br>";
-
-l1 = test.buildList(6, 1, 7);
-l2 = test.buildList(2, 9, 5);
-
-output += `List1 : ${test.listToString(l1)}<br>`;
-output += `List2 : ${test.listToString(l2)}<br>`;
-
-result = test.addLists2(l1, l2);
-
-output += `Result: ${test.listToString(result)}<br><br>`;
-
-l1 = test.buildList(9, 9, 9);
-l2 = test.buildList(1);
-
-result = test.addLists2(l1, l2);
-
-output += `999 + 1 : ${test.listToString(result)}<br><br>`;
-
-l1 = test.buildList(1, 2, 3, 4);
-l2 = test.buildList(5, 6, 7);
-
-result = test.addLists2(l1, l2);
-
-output += `1234 + 567 : ${test.listToString(result)}<br><br>`;
-
-l1 = test.buildList(0);
-l2 = test.buildList(0);
-
-result = test.addLists2(l1, l2);
-
-output += `0 + 0 : ${test.listToString(result)}<br><br>`;
-
-l1 = null;
-l2 = test.buildList(5, 4);
-
-result = test.addLists2(l1, l2);
-
-output += `Empty + List : ${test.listToString(result)}<br><br>`;
-
-output += "<b>Study Complete.</b>";
-
 //====================================================
 // Solution 1 (Book)
 // Digits stored in reverse order
@@ -243,3 +144,147 @@ private addListsHelper(
     return sum;
 }
 
+    //====================================================
+    // Helpers for Solution 2
+    //====================================================
+
+    padList(
+        l: LinkedListNode | null,
+        padding: number
+    ): LinkedListNode | null {
+
+        let head = l;
+
+        for (let i = 0; i < padding; i++) {
+            head = this.insertBefore(head, 0);
+        }
+
+        return head;
+    }
+
+    insertBefore(
+        list: LinkedListNode | null,
+        data: number
+    ): LinkedListNode {
+
+        const node = new LinkedListNode(data);
+
+        if (list !== null) {
+            node.next = list;
+        }
+
+        return node;
+    }
+
+    length(head: LinkedListNode | null): number {
+
+        let size = 0;
+
+        while (head !== null) {
+            size++;
+            head = head.next;
+        }
+
+        return size;
+    }
+
+}
+
+const test = new Chap2_sumLists();
+
+let output = ">>> CTCI Chapter 2.5 - Sum Lists <<<br><br>";
+
+//====================================================
+// Solution 1
+//====================================================
+
+output += "<b>========== Solution 1 : Reverse Order ==========</b><br><br>";
+
+let l1 = test.buildList(7, 1, 6);
+let l2 = test.buildList(5, 9, 2);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+let result = test.addLists(l1, l2, 0);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(9, 9, 9);
+l2 = test.buildList(1);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+result = test.addLists(l1, l2, 0);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(0);
+l2 = test.buildList(0);
+
+result = test.addLists(l1, l2, 0);
+
+output += `0 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(1, 8);
+l2 = test.buildList(0);
+
+result = test.addLists(l1, l2, 0);
+
+output += `18 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = null;
+l2 = test.buildList(5, 4);
+
+result = test.addLists(l1, l2, 0);
+
+output += `Empty + List : ${test.listToString(result)}<br><br>`;
+
+//====================================================
+// Solution 2
+//====================================================
+
+output += "<b>========== Solution 2 : Forward Order ==========</b><br><br>";
+
+l1 = test.buildList(6, 1, 7);
+l2 = test.buildList(2, 9, 5);
+
+output += `List1 : ${test.listToString(l1)}<br>`;
+output += `List2 : ${test.listToString(l2)}<br>`;
+
+result = test.addLists2(l1, l2);
+
+output += `Result: ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(9, 9, 9);
+l2 = test.buildList(1);
+
+result = test.addLists2(l1, l2);
+
+output += `999 + 1 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(1, 2, 3, 4);
+l2 = test.buildList(5, 6, 7);
+
+result = test.addLists2(l1, l2);
+
+output += `1234 + 567 : ${test.listToString(result)}<br><br>`;
+
+l1 = test.buildList(0);
+l2 = test.buildList(0);
+
+result = test.addLists2(l1, l2);
+
+output += `0 + 0 : ${test.listToString(result)}<br><br>`;
+
+l1 = null;
+l2 = test.buildList(5, 4);
+
+result = test.addLists2(l1, l2);
+
+output += `Empty + List : ${test.listToString(result)}<br><br>`;
+
+output += "<b>Study Complete.</b>";
+
+(document.querySelector("#t1") as HTMLElement).innerHTML = output;
