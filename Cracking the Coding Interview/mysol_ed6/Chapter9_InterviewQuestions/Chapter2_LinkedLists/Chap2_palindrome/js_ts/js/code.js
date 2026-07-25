@@ -7,23 +7,16 @@ class LinkedListNode {
 
 }
 
-class Chap2_deleteMiddleNode {
+class Result {
 
-    //====================================================
-    // Book Solution
-    //====================================================
-
-    deleteNode(node) {
-
-        if (node === null || node.next === null) {
-            return false;
-        }
-
-        node.data = node.next.data;
-        node.next = node.next.next;
-
-        return true;
+    constructor(node, result) {
+        this.node = node;
+        this.result = result;
     }
+
+}
+
+class Chap2_palindrome {
 
     //====================================================
     // Helpers
@@ -39,26 +32,11 @@ class Chap2_deleteMiddleNode {
         let current = head;
 
         for (let i = 1; i < values.length; i++) {
-
             current.next = new LinkedListNode(values[i]);
             current = current.next;
         }
 
         return head;
-    }
-
-    findNode(head, value) {
-
-        while (head !== null) {
-
-            if (head.data === value) {
-                return head;
-            }
-
-            head = head.next;
-        }
-
-        return null;
     }
 
     listToString(head) {
@@ -70,7 +48,6 @@ class Chap2_deleteMiddleNode {
         const result = [];
 
         while (head !== null) {
-
             result.push(head.data);
             head = head.next;
         }
@@ -78,59 +55,213 @@ class Chap2_deleteMiddleNode {
         return result.join(" -> ");
     }
 
+    //====================================================
+    // Solution 1 (Book)
+    // Reverse and Compare
+    //====================================================
+
+    isPalindrome(head) {
+
+        const reversed = this.reverseAndClone(head);
+
+        return this.isEqual(head, reversed);
+    }
+
+    reverseAndClone(node) {
+
+        let head = null;
+
+        while (node !== null) {
+
+            const n = new LinkedListNode(node.data);
+
+            n.next = head;
+            head = n;
+
+            node = node.next;
+        }
+
+        return head;
+    }
+
+    isEqual(one, two) {
+
+        while (one !== null && two !== null) {
+
+            if (one.data !== two.data) {
+                return false;
+            }
+
+            one = one.next;
+            two = two.next;
+        }
+
+        return one === null && two === null;
+    }
+
+    //====================================================
+    // Solution 2 (Book)
+    // Iterative Using Stack
+    //====================================================
+
+    isPalindrome2(head) {
+
+        let fast = head;
+        let slow = head;
+
+        const stack = [];
+
+        while (fast !== null && fast.next !== null) {
+
+            stack.push(slow.data);
+
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        // Odd number of nodes, skip the middle node.
+        if (fast !== null) {
+            slow = slow.next;
+        }
+
+        while (slow !== null) {
+
+            const top = stack.pop();
+
+            if (top !== slow.data) {
+                return false;
+            }
+
+            slow = slow.next;
+        }
+
+        return true;
+    }
+
+    //====================================================
+    // Solution 3 (Book)
+    // Recursive
+    //====================================================
+
+    isPalindrome3(head) {
+
+        const length = this.lengthOfList(head);
+
+        const p = this.isPalindromeRecurse(head, length);
+
+        return p.result;
+    }
+
+    isPalindromeRecurse(head, length) {
+
+        if (head === null || length <= 0) {
+
+            // Even number of nodes.
+            return new Result(head, true);
+
+        } else if (length === 1) {
+
+            // Odd number of nodes.
+            return new Result(head.next, true);
+        }
+
+        const res = this.isPalindromeRecurse(head.next, length - 2);
+
+        if (!res.result || res.node === null) {
+            return res;
+        }
+
+        res.result = (head.data === res.node.data);
+
+        res.node = res.node.next;
+
+        return res;
+    }
+
+    lengthOfList(head) {
+
+        let size = 0;
+
+        while (head !== null) {
+            size++;
+            head = head.next;
+        }
+
+        return size;
+    }
+
 }
 
-const test = new Chap2_deleteMiddleNode();
+const test = new Chap2_palindrome();
 
-let output = ">>> CTCI Chapter 2.3 - Delete Middle Node <<<br><br>";
+const tests = [
 
-output += "<b>========== Test 1 : Delete Middle Node ==========</b><br><br>";
+    test.buildList(),
 
-let list = test.buildList("a", "b", "c", "d", "e", "f");
+    test.buildList(1),
 
-output += `Original : ${test.listToString(list)}<br>`;
+    test.buildList(1, 1),
 
-let node = test.findNode(list, "c");
+    test.buildList(1, 2),
 
-output += `Delete Node : ${node.data}<br>`;
-output += `Success : ${test.deleteNode(node)}<br>`;
-output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
+    test.buildList(1, 2, 1),
 
-output += "<b>========== Test 2 : Delete Another Middle Node ==========</b><br><br>";
+    test.buildList(1, 2, 2, 1),
 
-list = test.buildList("a", "b", "c", "d", "e", "f");
+    test.buildList(1, 2, 3, 2, 1),
 
-output += `Original : ${test.listToString(list)}<br>`;
+    test.buildList(1, 2, 3, 4, 1),
 
-node = test.findNode(list, "e");
+    test.buildList(0, 1, 2, 1, 0),
 
-output += `Delete Node : ${node.data}<br>`;
-output += `Success : ${test.deleteNode(node)}<br>`;
-output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
+    test.buildList(5, 4, 4, 5),
 
-output += "<b>========== Test 3 : Last Node ==========</b><br><br>";
+    test.buildList(9, 8, 7, 8, 9),
 
-list = test.buildList("a", "b", "c");
+    test.buildList(1, 2, 3, 4, 5)
 
-output += `Original : ${test.listToString(list)}<br>`;
+];
 
-node = test.findNode(list, "c");
+let output = ">>> CTCI Chapter 2.6 - Palindrome <<<br><br>";
 
-output += `Delete Node : ${node.data}<br>`;
-output += `Success : ${test.deleteNode(node)}<br>`;
-output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
+//====================================================
+// Solution 1
+//====================================================
 
-output += "<b>========== Test 4 : Single Node ==========</b><br><br>";
+output += "<b>========== Solution 1 : Reverse and Compare ==========</b><br><br>";
 
-list = test.buildList("x");
+tests.forEach(head => {
 
-output += `Original : ${test.listToString(list)}<br>`;
-output += `Success : ${test.deleteNode(list)}<br>`;
-output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${test.listToString(list)}<br><br>`;
+    output += `List : ${test.listToString(head)}<br>`;
+    output += `Result : ${test.isPalindrome(head)}<br><br>`;
 
-output += "<b>========== Test 5 : Null ==========</b><br><br>";
+});
 
-output += `Success : ${test.deleteNode(null)}<br><br>`;
+//====================================================
+// Solution 2
+//====================================================
+
+output += "<b>========== Solution 2 : Stack ==========</b><br><br>";
+
+tests.forEach(head => {
+
+    output += `List : ${test.listToString(head)}<br>`;
+    output += `Result : ${test.isPalindrome2(head)}<br><br>`;
+
+});
+
+//====================================================
+// Solution 3
+//====================================================
+
+output += "<b>========== Solution 3 : Recursive ==========</b><br><br>";
+
+tests.forEach(head => {
+
+    output += `List : ${test.listToString(head)}<br>`;
+    output += `Result : ${test.isPalindrome3(head)}<br><br>`;
+
+});
 
 output += "<b>Study Complete.</b>";
 
