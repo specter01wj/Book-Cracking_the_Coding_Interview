@@ -1,268 +1,231 @@
 class LinkedListNode {
-
     constructor(data) {
         this.data = data;
         this.next = null;
     }
-
 }
 
 class Result {
-
-    constructor(node, result) {
-        this.node = node;
-        this.result = result;
+    constructor(tail, size) {
+        this.tail = tail;
+        this.size = size;
     }
-
 }
 
-class Chap2_palindrome {
-
-    //====================================================
-    // Helpers
-    //====================================================
-
-    buildList(...values) {
-
-        if (values.length === 0) {
-            return null;
-        }
-
-        const head = new LinkedListNode(values[0]);
-        let current = head;
-
-        for (let i = 1; i < values.length; i++) {
-            current.next = new LinkedListNode(values[i]);
-            current = current.next;
-        }
-
-        return head;
+function findIntersection(list1, list2) {
+    if (list1 === null || list2 === null) {
+        return null;
     }
 
-    listToString(head) {
+    const result1 = getTailAndSize(list1);
+    const result2 = getTailAndSize(list2);
 
-        if (head === null) {
-            return "Empty";
-        }
-
-        const result = [];
-
-        while (head !== null) {
-            result.push(head.data);
-            head = head.next;
-        }
-
-        return result.join(" -> ");
+    if (result1.tail !== result2.tail) {
+        return null;
     }
 
-    //====================================================
-    // Solution 1 (Book)
-    // Reverse and Compare
-    //====================================================
+    let shorter =
+        result1.size < result2.size ? list1 : list2;
 
-    isPalindrome(head) {
+    let longer =
+        result1.size < result2.size ? list2 : list1;
 
-        const reversed = this.reverseAndClone(head);
+    longer = getKthNode(
+        longer,
+        Math.abs(result1.size - result2.size)
+    );
 
-        return this.isEqual(head, reversed);
+    while (shorter !== longer) {
+        shorter = shorter.next;
+        longer = longer.next;
     }
 
-    reverseAndClone(node) {
-
-        let head = null;
-
-        while (node !== null) {
-
-            const n = new LinkedListNode(node.data);
-
-            n.next = head;
-            head = n;
-
-            node = node.next;
-        }
-
-        return head;
-    }
-
-    isEqual(one, two) {
-
-        while (one !== null && two !== null) {
-
-            if (one.data !== two.data) {
-                return false;
-            }
-
-            one = one.next;
-            two = two.next;
-        }
-
-        return one === null && two === null;
-    }
-
-    //====================================================
-    // Solution 2 (Book)
-    // Iterative Using Stack
-    //====================================================
-
-    isPalindrome2(head) {
-
-        let fast = head;
-        let slow = head;
-
-        const stack = [];
-
-        while (fast !== null && fast.next !== null) {
-
-            stack.push(slow.data);
-
-            slow = slow.next;
-            fast = fast.next.next;
-        }
-
-        // Odd number of nodes, skip the middle node.
-        if (fast !== null) {
-            slow = slow.next;
-        }
-
-        while (slow !== null) {
-
-            const top = stack.pop();
-
-            if (top !== slow.data) {
-                return false;
-            }
-
-            slow = slow.next;
-        }
-
-        return true;
-    }
-
-    //====================================================
-    // Solution 3 (Book)
-    // Recursive
-    //====================================================
-
-    isPalindrome3(head) {
-
-        const length = this.lengthOfList(head);
-
-        const p = this.isPalindromeRecurse(head, length);
-
-        return p.result;
-    }
-
-    isPalindromeRecurse(head, length) {
-
-        if (head === null || length <= 0) {
-
-            // Even number of nodes.
-            return new Result(head, true);
-
-        } else if (length === 1) {
-
-            // Odd number of nodes.
-            return new Result(head.next, true);
-        }
-
-        const res = this.isPalindromeRecurse(head.next, length - 2);
-
-        if (!res.result || res.node === null) {
-            return res;
-        }
-
-        res.result = (head.data === res.node.data);
-
-        res.node = res.node.next;
-
-        return res;
-    }
-
-    lengthOfList(head) {
-
-        let size = 0;
-
-        while (head !== null) {
-            size++;
-            head = head.next;
-        }
-
-        return size;
-    }
-
+    return longer;
 }
 
-const test = new Chap2_palindrome();
+function getTailAndSize(list) {
+    let size = 1;
+    let current = list;
 
-const tests = [
+    while (current.next !== null) {
+        size++;
+        current = current.next;
+    }
 
-    test.buildList(),
+    return new Result(current, size);
+}
 
-    test.buildList(1),
+function getKthNode(head, k) {
+    let current = head;
 
-    test.buildList(1, 1),
+    while (k > 0 && current !== null) {
+        current = current.next;
+        k--;
+    }
 
-    test.buildList(1, 2),
+    return current;
+}
 
-    test.buildList(1, 2, 1),
+function createList(...values) {
+    if (values.length === 0) {
+        return null;
+    }
 
-    test.buildList(1, 2, 2, 1),
+    const head = new LinkedListNode(values[0]);
+    let current = head;
 
-    test.buildList(1, 2, 3, 2, 1),
+    for (let i = 1; i < values.length; i++) {
+        current.next = new LinkedListNode(values[i]);
+        current = current.next;
+    }
 
-    test.buildList(1, 2, 3, 4, 1),
+    return head;
+}
 
-    test.buildList(0, 1, 2, 1, 0),
+function getLastNode(head) {
+    if (head === null) {
+        return null;
+    }
 
-    test.buildList(5, 4, 4, 5),
+    let current = head;
 
-    test.buildList(9, 8, 7, 8, 9),
+    while (current.next !== null) {
+        current = current.next;
+    }
 
-    test.buildList(1, 2, 3, 4, 5)
+    return current;
+}
 
-];
+function listToString(head) {
+    if (head === null) {
+        return "null";
+    }
 
-let output = ">>> CTCI Chapter 2.6 - Palindrome <<<br><br>";
+    const values = [];
+    let current = head;
 
-//====================================================
-// Solution 1
-//====================================================
+    while (current !== null) {
+        values.push(current.data);
+        current = current.next;
+    }
 
-output += "<b>========== Solution 1 : Reverse and Compare ==========</b><br><br>";
+    return values.join(" -> ");
+}
 
-tests.forEach(head => {
+function nodeValue(node) {
+    return node === null ? "null" : String(node.data);
+}
 
-    output += `List : ${test.listToString(head)}<br>`;
-    output += `Result : ${test.isPalindrome(head)}<br><br>`;
+function runTest(testName, list1, list2, expected) {
+    const actual = findIntersection(list1, list2);
 
-});
+    let output = `<b>${testName}</b><br>`;
+    output += `List 1: ${listToString(list1)}<br>`;
+    output += `List 2: ${listToString(list2)}<br>`;
+    output += `Expected: ${nodeValue(expected)}<br>`;
+    output += `Actual: ${nodeValue(actual)}<br>`;
+    output += `Result: ${actual === expected ? "PASS" : "FAIL"}<br><br>`;
 
-//====================================================
-// Solution 2
-//====================================================
+    return output;
+}
 
-output += "<b>========== Solution 2 : Stack ==========</b><br><br>";
+// Test 1: Different lengths, intersection in the middle
+const shared1 = createList(7, 2, 1);
 
-tests.forEach(head => {
+const list1 = createList(3, 1, 5, 9);
+getLastNode(list1).next = shared1;
 
-    output += `List : ${test.listToString(head)}<br>`;
-    output += `Result : ${test.isPalindrome2(head)}<br><br>`;
+const list2 = createList(4, 6);
+getLastNode(list2).next = shared1;
 
-});
+// Test 2: Equal lengths
+const shared2 = createList(8, 10);
 
-//====================================================
-// Solution 3
-//====================================================
+const list3 = createList(1, 2);
+getLastNode(list3).next = shared2;
 
-output += "<b>========== Solution 3 : Recursive ==========</b><br><br>";
+const list4 = createList(3, 4);
+getLastNode(list4).next = shared2;
 
-tests.forEach(head => {
+// Test 3: Same head
+const sameList = createList(11, 12, 13);
 
-    output += `List : ${test.listToString(head)}<br>`;
-    output += `Result : ${test.isPalindrome3(head)}<br><br>`;
+// Test 4: Intersection at tail
+const sharedTail = new LinkedListNode(99);
 
-});
+const list5 = createList(1, 2, 3);
+getLastNode(list5).next = sharedTail;
 
-output += "<b>Study Complete.</b>";
+const list6 = createList(4, 5);
+getLastNode(list6).next = sharedTail;
+
+// Test 5: Same values, different references
+const list7 = createList(1, 2, 3);
+const list8 = createList(1, 2, 3);
+
+// Test 6: No intersection
+const list9 = createList(1, 2, 3);
+const list10 = createList(4, 5, 6);
+
+// Test 7
+const list11 = createList(1, 2, 3);
+
+let output = ">>> CTCI Chapter 2.7 – Intersection <<br><br>";
+
+output += runTest(
+    "Test 1: Different lengths",
+    list1,
+    list2,
+    shared1
+);
+
+output += runTest(
+    "Test 2: Equal lengths",
+    list3,
+    list4,
+    shared2
+);
+
+output += runTest(
+    "Test 3: Same head",
+    sameList,
+    sameList,
+    sameList
+);
+
+output += runTest(
+    "Test 4: Intersection at tail",
+    list5,
+    list6,
+    sharedTail
+);
+
+output += runTest(
+    "Test 5: Same values, different references",
+    list7,
+    list8,
+    null
+);
+
+output += runTest(
+    "Test 6: No intersection",
+    list9,
+    list10,
+    null
+);
+
+output += runTest(
+    "Test 7: First list is null",
+    null,
+    list11,
+    null
+);
+
+output += runTest(
+    "Test 8: Both lists are null",
+    null,
+    null,
+    null
+);
 
 document.querySelector("#t1").innerHTML = output;
