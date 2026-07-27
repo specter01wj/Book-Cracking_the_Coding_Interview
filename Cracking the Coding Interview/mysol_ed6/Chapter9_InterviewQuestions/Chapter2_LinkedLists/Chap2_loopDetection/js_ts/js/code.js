@@ -1,231 +1,229 @@
 class LinkedListNode {
+
     constructor(data) {
         this.data = data;
         this.next = null;
     }
+
 }
 
-class Result {
-    constructor(tail, size) {
-        this.tail = tail;
-        this.size = size;
+class Chap2_loopDetection {
+
+    //====================================================
+    // Book Solution
+    //====================================================
+
+    findBeginning(head) {
+
+        let slow = head;
+        let fast = head;
+
+        while (fast !== null && fast.next !== null) {
+
+            slow = slow.next;
+            fast = fast.next.next;
+
+            if (slow === fast) {
+                break;
+            }
+        }
+
+        if (fast === null || fast.next === null) {
+            return null;
+        }
+
+        slow = head;
+
+        while (slow !== fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        return fast;
     }
+
+    //====================================================
+    // Helpers
+    //====================================================
+
+    createList(...values) {
+
+        if (values.length === 0) {
+            return null;
+        }
+
+        const head = new LinkedListNode(values[0]);
+        let current = head;
+
+        for (let i = 1; i < values.length; i++) {
+            current.next = new LinkedListNode(values[i]);
+            current = current.next;
+        }
+
+        return head;
+    }
+
+    getLastNode(head) {
+
+        if (head === null) {
+            return null;
+        }
+
+        let current = head;
+
+        while (current.next !== null) {
+            current = current.next;
+        }
+
+        return current;
+    }
+
+    getNode(head, index) {
+
+        let current = head;
+
+        while (index > 0 && current !== null) {
+            current = current.next;
+            index--;
+        }
+
+        return current;
+    }
+
+    nodeValue(node) {
+
+        return node === null ? "null" : String(node.data);
+    }
+
 }
 
-function findIntersection(list1, list2) {
-    if (list1 === null || list2 === null) {
-        return null;
-    }
+const test = new Chap2_loopDetection();
 
-    const result1 = getTailAndSize(list1);
-    const result2 = getTailAndSize(list2);
+let output = ">>> CTCI Chapter 2.8 - Loop Detection <<<br><br>";
 
-    if (result1.tail !== result2.tail) {
-        return null;
-    }
+//====================================================
+// Test 1: Book Example
+//====================================================
 
-    let shorter =
-        result1.size < result2.size ? list1 : list2;
+const a = new LinkedListNode("A");
+const b = new LinkedListNode("B");
+const c = new LinkedListNode("C");
+const d = new LinkedListNode("D");
+const e = new LinkedListNode("E");
 
-    let longer =
-        result1.size < result2.size ? list2 : list1;
+a.next = b;
+b.next = c;
+c.next = d;
+d.next = e;
+e.next = c;
 
-    longer = getKthNode(
-        longer,
-        Math.abs(result1.size - result2.size)
-    );
+let actual = test.findBeginning(a);
 
-    while (shorter !== longer) {
-        shorter = shorter.next;
-        longer = longer.next;
-    }
+output += "<b>========== Test 1 : Book Example ==========</b><br><br>";
+output += `Expected : C<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === c ? "PASS" : "FAIL"}<br><br>`;
 
-    return longer;
-}
+//====================================================
+// Test 2: No Loop
+//====================================================
 
-function getTailAndSize(list) {
-    let size = 1;
-    let current = list;
+let list = test.createList(1, 2, 3, 4, 5);
 
-    while (current.next !== null) {
-        size++;
-        current = current.next;
-    }
+actual = test.findBeginning(list);
 
-    return new Result(current, size);
-}
+output += "<b>========== Test 2 : No Loop ==========</b><br><br>";
+output += `Expected : null<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === null ? "PASS" : "FAIL"}<br><br>`;
 
-function getKthNode(head, k) {
-    let current = head;
+//====================================================
+// Test 3: Loop Starts at Head
+//====================================================
 
-    while (k > 0 && current !== null) {
-        current = current.next;
-        k--;
-    }
+list = test.createList(1, 2, 3, 4);
 
-    return current;
-}
+test.getLastNode(list).next = list;
 
-function createList(...values) {
-    if (values.length === 0) {
-        return null;
-    }
+actual = test.findBeginning(list);
 
-    const head = new LinkedListNode(values[0]);
-    let current = head;
+output += "<b>========== Test 3 : Loop Starts at Head ==========</b><br><br>";
+output += `Expected : 1<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === list ? "PASS" : "FAIL"}<br><br>`;
 
-    for (let i = 1; i < values.length; i++) {
-        current.next = new LinkedListNode(values[i]);
-        current = current.next;
-    }
+//====================================================
+// Test 4: Single Node
+//====================================================
 
-    return head;
-}
+const single = new LinkedListNode(10);
 
-function getLastNode(head) {
-    if (head === null) {
-        return null;
-    }
+actual = test.findBeginning(single);
 
-    let current = head;
+output += "<b>========== Test 4 : Single Node ==========</b><br><br>";
+output += `Expected : null<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === null ? "PASS" : "FAIL"}<br><br>`;
 
-    while (current.next !== null) {
-        current = current.next;
-    }
+//====================================================
+// Test 5: Self Loop
+//====================================================
 
-    return current;
-}
+const selfLoop = new LinkedListNode(99);
+selfLoop.next = selfLoop;
 
-function listToString(head) {
-    if (head === null) {
-        return "null";
-    }
+actual = test.findBeginning(selfLoop);
 
-    const values = [];
-    let current = head;
+output += "<b>========== Test 5 : Self Loop ==========</b><br><br>";
+output += `Expected : 99<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === selfLoop ? "PASS" : "FAIL"}<br><br>`;
 
-    while (current !== null) {
-        values.push(current.data);
-        current = current.next;
-    }
+//====================================================
+// Test 6: Two Node Loop
+//====================================================
 
-    return values.join(" -> ");
-}
+const n1 = new LinkedListNode(1);
+const n2 = new LinkedListNode(2);
 
-function nodeValue(node) {
-    return node === null ? "null" : String(node.data);
-}
+n1.next = n2;
+n2.next = n1;
 
-function runTest(testName, list1, list2, expected) {
-    const actual = findIntersection(list1, list2);
+actual = test.findBeginning(n1);
 
-    let output = `<b>${testName}</b><br>`;
-    output += `List 1: ${listToString(list1)}<br>`;
-    output += `List 2: ${listToString(list2)}<br>`;
-    output += `Expected: ${nodeValue(expected)}<br>`;
-    output += `Actual: ${nodeValue(actual)}<br>`;
-    output += `Result: ${actual === expected ? "PASS" : "FAIL"}<br><br>`;
+output += "<b>========== Test 6 : Two Node Loop ==========</b><br><br>";
+output += `Expected : 1<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === n1 ? "PASS" : "FAIL"}<br><br>`;
 
-    return output;
-}
+//====================================================
+// Test 7: Loop in Middle
+//====================================================
 
-// Test 1: Different lengths, intersection in the middle
-const shared1 = createList(7, 2, 1);
+list = test.createList(1, 2, 3, 4, 5, 6);
 
-const list1 = createList(3, 1, 5, 9);
-getLastNode(list1).next = shared1;
+const loopStart = test.getNode(list, 3);
 
-const list2 = createList(4, 6);
-getLastNode(list2).next = shared1;
+test.getLastNode(list).next = loopStart;
 
-// Test 2: Equal lengths
-const shared2 = createList(8, 10);
+actual = test.findBeginning(list);
 
-const list3 = createList(1, 2);
-getLastNode(list3).next = shared2;
+output += "<b>========== Test 7 : Loop in Middle ==========</b><br><br>";
+output += `Expected : 4<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === loopStart ? "PASS" : "FAIL"}<br><br>`;
 
-const list4 = createList(3, 4);
-getLastNode(list4).next = shared2;
+//====================================================
+// Test 8: Empty List
+//====================================================
 
-// Test 3: Same head
-const sameList = createList(11, 12, 13);
+actual = test.findBeginning(null);
 
-// Test 4: Intersection at tail
-const sharedTail = new LinkedListNode(99);
+output += "<b>========== Test 8 : Empty List ==========</b><br><br>";
+output += `Expected : null<br>`;
+output += `Actual&nbsp;&nbsp;&nbsp;&nbsp;: ${test.nodeValue(actual)}<br>`;
+output += `Result&nbsp;&nbsp;&nbsp;&nbsp;: ${actual === null ? "PASS" : "FAIL"}<br><br>`;
 
-const list5 = createList(1, 2, 3);
-getLastNode(list5).next = sharedTail;
-
-const list6 = createList(4, 5);
-getLastNode(list6).next = sharedTail;
-
-// Test 5: Same values, different references
-const list7 = createList(1, 2, 3);
-const list8 = createList(1, 2, 3);
-
-// Test 6: No intersection
-const list9 = createList(1, 2, 3);
-const list10 = createList(4, 5, 6);
-
-// Test 7
-const list11 = createList(1, 2, 3);
-
-let output = ">>> CTCI Chapter 2.7 – Intersection <<br><br>";
-
-output += runTest(
-    "Test 1: Different lengths",
-    list1,
-    list2,
-    shared1
-);
-
-output += runTest(
-    "Test 2: Equal lengths",
-    list3,
-    list4,
-    shared2
-);
-
-output += runTest(
-    "Test 3: Same head",
-    sameList,
-    sameList,
-    sameList
-);
-
-output += runTest(
-    "Test 4: Intersection at tail",
-    list5,
-    list6,
-    sharedTail
-);
-
-output += runTest(
-    "Test 5: Same values, different references",
-    list7,
-    list8,
-    null
-);
-
-output += runTest(
-    "Test 6: No intersection",
-    list9,
-    list10,
-    null
-);
-
-output += runTest(
-    "Test 7: First list is null",
-    null,
-    list11,
-    null
-);
-
-output += runTest(
-    "Test 8: Both lists are null",
-    null,
-    null,
-    null
-);
+output += "<b>Study Complete.</b>";
 
 document.querySelector("#t1").innerHTML = output;
