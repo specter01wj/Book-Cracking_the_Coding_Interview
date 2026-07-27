@@ -100,4 +100,107 @@ public class Chap2_loopDetection {
                 null
         );
     }
+    
+    LinkedListNode findBeginning(LinkedListNode head) {
+        LinkedListNode slow = head;
+        LinkedListNode fast = head;
+
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+
+            if (slow == fast) {
+                break;
+            }
+        }
+
+        if (fast == null || fast.next == null) {
+            return null;
+        }
+
+        slow = head;
+
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        return fast;
+    }
+
+    LinkedListNode createList(int... values) {
+        if (values.length == 0) {
+            return null;
+        }
+
+        LinkedListNode head = new LinkedListNode(values[0]);
+        LinkedListNode current = head;
+
+        for (int i = 1; i < values.length; i++) {
+            current.next = new LinkedListNode(values[i]);
+            current = current.next;
+        }
+
+        return head;
+    }
+
+    LinkedListNode getLastNode(LinkedListNode head) {
+        if (head == null) {
+            return null;
+        }
+
+        LinkedListNode current = head;
+
+        while (current.next != null) {
+            current = current.next;
+        }
+
+        return current;
+    }
+
+    LinkedListNode getNode(LinkedListNode head, int index) {
+        LinkedListNode current = head;
+
+        while (index > 0 && current != null) {
+            current = current.next;
+            index--;
+        }
+
+        return current;
+    }
+
+    void runTest(
+            String testName,
+            LinkedListNode head,
+            LinkedListNode expected) {
+
+        LinkedListNode actual = findBeginning(head);
+
+        System.out.println(testName);
+        System.out.println("Expected: " + nodeValue(expected));
+        System.out.println("Actual:   " + nodeValue(actual));
+        System.out.println(
+                "Result:   " + (actual == expected ? "PASS" : "FAIL")
+        );
+        System.out.println();
+    }
+
+    String nodeValue(LinkedListNode node) {
+        if (node == null) {
+            return "null";
+        }
+
+        return String.valueOf(node.data);
+    }
+}
+
+
+
+class LinkedListNode {
+    Object data;
+    LinkedListNode next;
+
+    LinkedListNode(Object data) {
+        this.data = data;
+    }
 }
