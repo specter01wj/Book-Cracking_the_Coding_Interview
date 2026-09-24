@@ -46,13 +46,13 @@ public class Chap3_stackMin {
 
         System.out.println();
 
-        System.out.println("Pop : " + stack1.pop());
+        System.out.println("Pop : " + stack1.pop().value);
         System.out.println("Stack : " + stack1);
         System.out.println("Min   : " + stack1.min());
 
         System.out.println();
 
-        System.out.println("Pop : " + stack1.pop());
+        System.out.println("Pop : " + stack1.pop().value);
         System.out.println("Stack : " + stack1);
         System.out.println("Min   : " + stack1.min());
 
@@ -68,12 +68,12 @@ public class Chap3_stackMin {
 
         System.out.println();
 
-        System.out.println("Pop : " + stack1.pop());
+        System.out.println("Pop : " + stack1.pop().value);
         System.out.println("Min : " + stack1.min());
 
         System.out.println();
 
-        System.out.println("Pop : " + stack1.pop());
+        System.out.println("Pop : " + stack1.pop().value);
         System.out.println("Min : " + stack1.min());
 
         System.out.println();
