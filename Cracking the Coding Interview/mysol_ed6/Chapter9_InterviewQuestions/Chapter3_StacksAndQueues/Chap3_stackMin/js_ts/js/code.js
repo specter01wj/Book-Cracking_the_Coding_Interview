@@ -1,489 +1,201 @@
-class FixedMultiStack {
+class NodeWithMin {
 
-    //====================================================
-    // Solution 1 (Book)
-    // Fixed Division
-    //====================================================
+    constructor(value, min) {
 
-    constructor(stackSize) {
-
-        if (stackSize <= 0) {
-            throw new Error(
-                "Stack size must be greater than 0."
-            );
-        }
-
-        this.NUMBER_OF_STACKS = 3;
-
-        this.stackCapacity = stackSize;
-
-        this.values =
-            new Array(stackSize * this.NUMBER_OF_STACKS).fill(0);
-
-        this.sizes =
-            new Array(this.NUMBER_OF_STACKS).fill(0);
+        this.value = value;
+        this.min = min;
     }
 
-    push(stackNum, value) {
-
-        this.validateStackNum(stackNum);
-
-        if (this.isFull(stackNum)) {
-            throw new Error(
-                `Stack ${stackNum} is full.`
-            );
-        }
-
-        this.sizes[stackNum]++;
-
-        this.values[this.indexOfTop(stackNum)] = value;
-    }
-
-    pop(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        if (this.isEmpty(stackNum)) {
-            throw new Error(
-                `Stack ${stackNum} is empty.`
-            );
-        }
-
-        const topIndex =
-            this.indexOfTop(stackNum);
-
-        const value =
-            this.values[topIndex];
-
-        this.values[topIndex] = 0;
-
-        this.sizes[stackNum]--;
-
-        return value;
-    }
-
-    peek(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        if (this.isEmpty(stackNum)) {
-            throw new Error(
-                `Stack ${stackNum} is empty.`
-            );
-        }
-
-        return this.values[
-            this.indexOfTop(stackNum)
-        ];
-    }
-
-    isEmpty(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        return this.sizes[stackNum] === 0;
-    }
-
-    isFull(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        return this.sizes[stackNum]
-            === this.stackCapacity;
-    }
-
-    size(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        return this.sizes[stackNum];
-    }
-
-    indexOfTop(stackNum) {
-
-        const offset =
-            stackNum * this.stackCapacity;
-
-        const size =
-            this.sizes[stackNum];
-
-        return offset + size - 1;
-    }
-
-    validateStackNum(stackNum) {
-
-        if (
-            stackNum < 0 ||
-            stackNum >= this.NUMBER_OF_STACKS
-        ) {
-
-            throw new Error(
-                "Stack number must be 0, 1, or 2."
-            );
-        }
-    }
 }
 
 
-//====================================================
-// StackInfo
-// Used by Solution 2
-//====================================================
+class StackWithMin {
 
-class StackInfo {
+    constructor() {
 
-    constructor(start, capacity, owner) {
-
-        this.start = start;
-        this.size = 0;
-        this.capacity = capacity;
-
-        this.owner = owner;
+        this.stack = [];
     }
 
-    isWithinStackCapacity(index) {
+    //====================================================
+    // Solution 1 (Book)
+    // Store Minimum in Every Node
+    //====================================================
 
-        if (
-            index < 0 ||
-            index >= this.owner.values.length
-        ) {
-            return false;
+    push(value) {
+
+        const newMin =
+            Math.min(
+                value,
+                this.min()
+            );
+
+        this.stack.push(
+            new NodeWithMin(
+                value,
+                newMin
+            )
+        );
+    }
+
+    pop() {
+
+        if (this.isEmpty()) {
+            throw new Error(
+                "Stack is empty."
+            );
         }
 
-        const contiguousIndex =
-            index < this.start
-                ? index + this.owner.values.length
-                : index;
-
-        const end =
-            this.start + this.capacity;
-
-        return (
-            this.start <= contiguousIndex &&
-            contiguousIndex < end
-        );
+        return this.stack.pop().value;
     }
 
-    lastCapacityIndex() {
+    peek() {
 
-        return this.owner.adjustIndex(
-            this.start + this.capacity - 1
-        );
+        if (this.isEmpty()) {
+            throw new Error(
+                "Stack is empty."
+            );
+        }
+
+        return this.stack[
+            this.stack.length - 1
+        ].value;
     }
 
-    lastElementIndex() {
+    min() {
 
-        return this.owner.adjustIndex(
-            this.start + this.size - 1
-        );
-    }
+        if (this.isEmpty()) {
+            return Number.POSITIVE_INFINITY;
+        }
 
-    isFull() {
-
-        return this.size === this.capacity;
+        return this.stack[
+            this.stack.length - 1
+        ].min;
     }
 
     isEmpty() {
 
-        return this.size === 0;
-    }
-}
-
-
-class FlexibleMultiStack {
-
-    //====================================================
-    // Solution 2 (Book)
-    // Flexible Division
-    //====================================================
-
-    constructor(numberOfStacks, defaultSize) {
-
-        if (
-            numberOfStacks <= 0 ||
-            defaultSize <= 0
-        ) {
-
-            throw new Error(
-                "Number of stacks and stack size must be greater than 0."
-            );
-        }
-
-        this.info =
-            new Array(numberOfStacks);
-
-        this.values =
-            new Array(
-                numberOfStacks * defaultSize
-            ).fill(0);
-
-        for (
-            let i = 0;
-            i < numberOfStacks;
-            i++
-        ) {
-
-            this.info[i] =
-                new StackInfo(
-                    defaultSize * i,
-                    defaultSize,
-                    this
-                );
-        }
+        return this.stack.length === 0;
     }
 
-    push(stackNum, value) {
+    size() {
 
-        this.validateStackNum(stackNum);
-
-        if (this.allStacksAreFull()) {
-
-            throw new Error(
-                "All stacks are full."
-            );
-        }
-
-        const stack =
-            this.info[stackNum];
-
-        /*
-         * If this stack is full,
-         * borrow capacity from another stack.
-         */
-        if (stack.isFull()) {
-            this.expand(stackNum);
-        }
-
-        stack.size++;
-
-        this.values[
-            stack.lastElementIndex()
-        ] = value;
-    }
-
-    pop(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        const stack =
-            this.info[stackNum];
-
-        if (stack.isEmpty()) {
-
-            throw new Error(
-                `Stack ${stackNum} is empty.`
-            );
-        }
-
-        const topIndex =
-            stack.lastElementIndex();
-
-        const value =
-            this.values[topIndex];
-
-        this.values[topIndex] = 0;
-
-        stack.size--;
-
-        return value;
-    }
-
-    peek(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        const stack =
-            this.info[stackNum];
-
-        if (stack.isEmpty()) {
-
-            throw new Error(
-                `Stack ${stackNum} is empty.`
-            );
-        }
-
-        return this.values[
-            stack.lastElementIndex()
-        ];
-    }
-
-    isEmpty(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        return this.info[stackNum].isEmpty();
-    }
-
-    size(stackNum) {
-
-        this.validateStackNum(stackNum);
-
-        return this.info[stackNum].size;
-    }
-
-    //====================================================
-    // Expand
-    //====================================================
-
-    expand(stackNum) {
-
-        this.shift(
-            (stackNum + 1) % this.info.length
-        );
-
-        this.info[stackNum].capacity++;
-    }
-
-    //====================================================
-    // Shift
-    //====================================================
-
-    shift(stackNum) {
-
-        const stack =
-            this.info[stackNum];
-
-        /*
-         * If this stack is full, first shift
-         * the next stack recursively.
-         */
-        if (stack.size >= stack.capacity) {
-
-            const nextStack =
-                (stackNum + 1)
-                % this.info.length;
-
-            this.shift(nextStack);
-
-            stack.capacity++;
-        }
-
-        /*
-         * Shift all elements in this stack
-         * one position to the right.
-         */
-        let index =
-            stack.lastCapacityIndex();
-
-        while (
-            stack.isWithinStackCapacity(index)
-        ) {
-
-            this.values[index] =
-                this.values[
-                    this.previousIndex(index)
-                ];
-
-            index =
-                this.previousIndex(index);
-        }
-
-        /*
-         * Clear the old starting position.
-         */
-        this.values[stack.start] = 0;
-
-        /*
-         * Move the stack start forward.
-         */
-        stack.start =
-            this.nextIndex(stack.start);
-
-        /*
-         * Give one capacity position
-         * to the previous stack.
-         */
-        stack.capacity--;
-    }
-
-    //====================================================
-    // Helpers
-    //====================================================
-
-    numberOfElements() {
-
-        let size = 0;
-
-        for (const stack of this.info) {
-            size += stack.size;
-        }
-
-        return size;
-    }
-
-    allStacksAreFull() {
-
-        return this.numberOfElements()
-            === this.values.length;
-    }
-
-    adjustIndex(index) {
-
-        const max =
-            this.values.length;
-
-        /*
-         * JavaScript's % can return a negative
-         * result, so normalize it.
-         */
-        return (
-            (index % max) + max
-        ) % max;
-    }
-
-    nextIndex(index) {
-
-        return this.adjustIndex(
-            index + 1
-        );
-    }
-
-    previousIndex(index) {
-
-        return this.adjustIndex(
-            index - 1
-        );
-    }
-
-    validateStackNum(stackNum) {
-
-        if (
-            stackNum < 0 ||
-            stackNum >= this.info.length
-        ) {
-
-            throw new Error(
-                `Invalid stack number: ${stackNum}`
-            );
-        }
+        return this.stack.length;
     }
 
     //====================================================
     // Display Helper
     //====================================================
 
-    stateToString() {
+    toString() {
 
-        let result =
-            `Array : [${this.values.join(", ")}]<br>`;
+        const values =
+            this.stack.map(
+                node => node.value
+            );
 
-        for (
-            let i = 0;
-            i < this.info.length;
-            i++
-        ) {
+        return `[${values.join(", ")}]`;
+    }
+}
 
-            const stack =
-                this.info[i];
 
-            result +=
-                `Stack ${i} -> ` +
-                `start: ${stack.start}, ` +
-                `size: ${stack.size}, ` +
-                `capacity: ${stack.capacity}<br>`;
+class StackWithMin2 {
+
+    constructor() {
+
+        this.stack = [];
+
+        this.minStack = [];
+    }
+
+    //====================================================
+    // Solution 2 (Book)
+    // Auxiliary Stack for Minimums
+    //====================================================
+
+    push(value) {
+
+        /*
+         * <= is important.
+         *
+         * If value equals the current minimum,
+         * the duplicate minimum must also be stored.
+         */
+        if (value <= this.min()) {
+            this.minStack.push(value);
         }
 
-        return result;
+        this.stack.push(value);
+    }
+
+    pop() {
+
+        if (this.isEmpty()) {
+            throw new Error(
+                "Stack is empty."
+            );
+        }
+
+        const value =
+            this.stack.pop();
+
+        /*
+         * If the value being removed is the
+         * current minimum, remove it from
+         * the min stack as well.
+         */
+        if (value === this.min()) {
+            this.minStack.pop();
+        }
+
+        return value;
+    }
+
+    peek() {
+
+        if (this.isEmpty()) {
+            throw new Error(
+                "Stack is empty."
+            );
+        }
+
+        return this.stack[
+            this.stack.length - 1
+        ];
+    }
+
+    min() {
+
+        if (this.minStack.length === 0) {
+            return Number.POSITIVE_INFINITY;
+        }
+
+        return this.minStack[
+            this.minStack.length - 1
+        ];
+    }
+
+    isEmpty() {
+
+        return this.stack.length === 0;
+    }
+
+    size() {
+
+        return this.stack.length;
+    }
+
+    //====================================================
+    // Display Helpers
+    //====================================================
+
+    toString() {
+
+        return `[${this.stack.join(", ")}]`;
+    }
+
+    minStackToString() {
+
+        return `[${this.minStack.join(", ")}]`;
     }
 }
 
@@ -493,7 +205,7 @@ class FlexibleMultiStack {
 //====================================================
 
 let output =
-    ">>> CTCI Chapter 3.1 - Three in One <<<<br><br>";
+    ">>> CTCI Chapter 3.2 - Stack Min <<<<br><br>";
 
 
 //====================================================
@@ -501,80 +213,105 @@ let output =
 //====================================================
 
 output +=
-    "<b>========== Solution 1 : Fixed Division ==========</b><br><br>";
+    "<b>========== Solution 1 : Min in Every Node ==========</b><br><br>";
 
-const fixedStacks =
-    new FixedMultiStack(3);
+const stack1 =
+    new StackWithMin();
 
-output +=
-    "Push values into all three stacks:<br>";
 
-fixedStacks.push(0, 10);
-fixedStacks.push(0, 20);
-fixedStacks.push(0, 30);
+output += "Push 5:<br>";
 
-fixedStacks.push(1, 100);
-fixedStacks.push(1, 200);
-
-fixedStacks.push(2, 1000);
+stack1.push(5);
 
 output +=
-    `Stack 0 top : ${fixedStacks.peek(0)}<br>`;
+    `Stack : ${stack1.toString()}<br>`;
 
 output +=
-    `Stack 1 top : ${fixedStacks.peek(1)}<br>`;
+    `Min   : ${stack1.min()}<br><br>`;
+
+
+output += "Push 6:<br>";
+
+stack1.push(6);
 
 output +=
-    `Stack 2 top : ${fixedStacks.peek(2)}<br><br>`;
-
-
-output +=
-    `Pop Stack 0 : ${fixedStacks.pop(0)}<br>`;
+    `Stack : ${stack1.toString()}<br>`;
 
 output +=
-    `Pop Stack 0 : ${fixedStacks.pop(0)}<br>`;
+    `Min   : ${stack1.min()}<br><br>`;
+
+
+output += "Push 3:<br>";
+
+stack1.push(3);
 
 output +=
-    `Stack 0 top : ${fixedStacks.peek(0)}<br><br>`;
-
-
-output +=
-    `Stack 0 size : ${fixedStacks.size(0)}<br>`;
+    `Stack : ${stack1.toString()}<br>`;
 
 output +=
-    `Stack 1 size : ${fixedStacks.size(1)}<br>`;
+    `Min   : ${stack1.min()}<br><br>`;
+
+
+output += "Push 7:<br>";
+
+stack1.push(7);
 
 output +=
-    `Stack 2 size : ${fixedStacks.size(2)}<br><br>`;
-
-
-output +=
-    "Fill Stack 0 again:<br>";
-
-fixedStacks.push(0, 40);
-fixedStacks.push(0, 50);
+    `Stack : ${stack1.toString()}<br>`;
 
 output +=
-    `Stack 0 top : ${fixedStacks.peek(0)}<br>`;
-
-output +=
-    `Stack 0 full: ${fixedStacks.isFull(0)}<br><br>`;
+    `Min   : ${stack1.min()}<br><br>`;
 
 
 output +=
-    "Try to push another value into full Stack 0:<br>";
+    `Pop : ${stack1.pop()}<br>`;
 
-try {
+output +=
+    `Stack : ${stack1.toString()}<br>`;
 
-    fixedStacks.push(0, 60);
+output +=
+    `Min   : ${stack1.min()}<br><br>`;
 
-} catch (error) {
 
-    output +=
-        `Exception : ${error.message}<br>`;
-}
+output +=
+    `Pop : ${stack1.pop()}<br>`;
 
-output += "<br>";
+output +=
+    `Stack : ${stack1.toString()}<br>`;
+
+output +=
+    `Min   : ${stack1.min()}<br><br>`;
+
+
+//====================================================
+// Solution 1 - Duplicate Minimum Test
+//====================================================
+
+output +=
+    "Test duplicate minimums:<br>";
+
+stack1.push(3);
+stack1.push(3);
+
+output +=
+    `Stack : ${stack1.toString()}<br>`;
+
+output +=
+    `Min   : ${stack1.min()}<br><br>`;
+
+
+output +=
+    `Pop : ${stack1.pop()}<br>`;
+
+output +=
+    `Min : ${stack1.min()}<br><br>`;
+
+
+output +=
+    `Pop : ${stack1.pop()}<br>`;
+
+output +=
+    `Min : ${stack1.min()}<br><br>`;
 
 
 //====================================================
@@ -582,122 +319,162 @@ output += "<br>";
 //====================================================
 
 output +=
-    "<b>========== Solution 2 : Flexible Division ==========</b><br><br>";
+    "<b>========== Solution 2 : Auxiliary Min Stack ==========</b><br><br>";
 
-const flexibleStacks =
-    new FlexibleMultiStack(3, 2);
+const stack2 =
+    new StackWithMin2();
+
+
+output += "Push 5:<br>";
+
+stack2.push(5);
+
+output +=
+    `Stack     : ${stack2.toString()}<br>`;
+
+output +=
+    `Min Stack : ${stack2.minStackToString()}<br>`;
+
+output +=
+    `Min       : ${stack2.min()}<br><br>`;
+
+
+output += "Push 6:<br>";
+
+stack2.push(6);
+
+output +=
+    `Stack     : ${stack2.toString()}<br>`;
+
+output +=
+    `Min Stack : ${stack2.minStackToString()}<br>`;
+
+output +=
+    `Min       : ${stack2.min()}<br><br>`;
+
+
+output += "Push 3:<br>";
+
+stack2.push(3);
+
+output +=
+    `Stack     : ${stack2.toString()}<br>`;
+
+output +=
+    `Min Stack : ${stack2.minStackToString()}<br>`;
+
+output +=
+    `Min       : ${stack2.min()}<br><br>`;
+
+
+output += "Push 7:<br>";
+
+stack2.push(7);
+
+output +=
+    `Stack     : ${stack2.toString()}<br>`;
+
+output +=
+    `Min Stack : ${stack2.minStackToString()}<br>`;
+
+output +=
+    `Min       : ${stack2.min()}<br><br>`;
 
 
 output +=
-    "Initial capacity:<br>";
+    `Pop : ${stack2.pop()}<br>`;
 
 output +=
-    flexibleStacks.stateToString();
-
-output += "<br>";
-
+    `Stack     : ${stack2.toString()}<br>`;
 
 output +=
-    "Fill Stack 0:<br>";
-
-flexibleStacks.push(0, 10);
-flexibleStacks.push(0, 20);
+    `Min Stack : ${stack2.minStackToString()}<br>`;
 
 output +=
-    flexibleStacks.stateToString();
-
-output += "<br>";
+    `Min       : ${stack2.min()}<br><br>`;
 
 
 output +=
-    "Push 30 into full Stack 0.<br>";
+    `Pop : ${stack2.pop()}<br>`;
 
 output +=
-    "Stack 0 expands by shifting another stack.<br>";
-
-flexibleStacks.push(0, 30);
+    `Stack     : ${stack2.toString()}<br>`;
 
 output +=
-    flexibleStacks.stateToString();
-
-output += "<br>";
-
+    `Min Stack : ${stack2.minStackToString()}<br>`;
 
 output +=
-    "Push more values:<br>";
+    `Min       : ${stack2.min()}<br><br>`;
 
-flexibleStacks.push(1, 100);
-flexibleStacks.push(1, 200);
 
-flexibleStacks.push(2, 1000);
-
-output +=
-    flexibleStacks.stateToString();
-
-output += "<br>";
-
+//====================================================
+// Solution 2 - Duplicate Minimum Test
+//====================================================
 
 output +=
-    `Stack 0 top : ${flexibleStacks.peek(0)}<br>`;
+    "Test duplicate minimums:<br>";
+
+stack2.push(3);
+stack2.push(3);
 
 output +=
-    `Stack 1 top : ${flexibleStacks.peek(1)}<br>`;
+    `Stack     : ${stack2.toString()}<br>`;
 
 output +=
-    `Stack 2 top : ${flexibleStacks.peek(2)}<br><br>`;
+    `Min Stack : ${stack2.minStackToString()}<br>`;
+
+output +=
+    `Min       : ${stack2.min()}<br><br>`;
 
 
 output +=
-    `Pop Stack 0 : ${flexibleStacks.pop(0)}<br>`;
+    `Pop : ${stack2.pop()}<br>`;
 
 output +=
-    `Stack 0 top : ${flexibleStacks.peek(0)}<br><br>`;
-
-
-output +=
-    flexibleStacks.stateToString();
-
-output += "<br>";
-
+    `Stack     : ${stack2.toString()}<br>`;
 
 output +=
-    "Try to fill the remaining shared space:<br>";
-
-flexibleStacks.push(2, 2000);
+    `Min Stack : ${stack2.minStackToString()}<br>`;
 
 output +=
-    flexibleStacks.stateToString();
-
-output += "<br>";
+    `Min       : ${stack2.min()}<br><br>`;
 
 
 output +=
-    "Try to push when entire array is full:<br>";
+    `Pop : ${stack2.pop()}<br>`;
+
+output +=
+    `Stack     : ${stack2.toString()}<br>`;
+
+output +=
+    `Min Stack : ${stack2.minStackToString()}<br>`;
+
+output +=
+    `Min       : ${stack2.min()}<br><br>`;
+
+
+//====================================================
+// Empty Stack Test
+//====================================================
+
+output +=
+    "<b>========== Empty Stack Test ==========</b><br><br>";
+
+const emptyStack =
+    new StackWithMin2();
 
 try {
 
-    flexibleStacks.push(2, 3000);
+    emptyStack.pop();
 
 } catch (error) {
 
     output +=
-        `Exception : ${error.message}<br>`;
+        `Pop from empty stack -> ${error.message}<br>`;
 }
 
-output += "<br>";
-
-
 output +=
-    "Final tops:<br>";
-
-output +=
-    `Stack 0 : ${flexibleStacks.peek(0)}<br>`;
-
-output +=
-    `Stack 1 : ${flexibleStacks.peek(1)}<br>`;
-
-output +=
-    `Stack 2 : ${flexibleStacks.peek(2)}<br><br>`;
+    `Min of empty stack : ${emptyStack.min()}<br><br>`;
 
 
 output +=
