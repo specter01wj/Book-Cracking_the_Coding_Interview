@@ -1,312 +1,66 @@
-class Node {
-
-    constructor(value) {
-
-        this.value = value;
-
-        this.above = null;
-        this.below = null;
-    }
-}
-
-
 //====================================================
-// Solution Helper (Book)
-// Individual Sub-Stack
+// Solution
 //====================================================
 
-class PlateStack {
+class MyQueue {
 
-    constructor(capacity) {
-
-        this.capacity = capacity;
-
-        this.top = null;
-        this.bottom = null;
-
-        this.size = 0;
+    constructor() {
+        this.stackNewest = [];
+        this.stackOldest = [];
     }
 
-    isFull() {
-
-        return this.size === this.capacity;
+    size() {
+        return this.stackNewest.length + this.stackOldest.length;
     }
 
-    isEmpty() {
+    add(value) {
 
-        return this.size === 0;
+        /*
+         * Push onto stackNewest, which always has
+         * the newest elements on top.
+         */
+        this.stackNewest.push(value);
     }
 
-    join(above, below) {
+    /*
+     * Move elements from stackNewest into stackOldest.
+     *
+     * This is done only when stackOldest is empty.
+     * Moving the elements reverses their order, placing
+     * the oldest element on top of stackOldest.
+     */
+    shiftStacks() {
 
-        if (below !== null) {
-            below.above = above;
-        }
+        if (this.stackOldest.length === 0) {
 
-        if (above !== null) {
-            above.below = below;
-        }
-    }
-
-    push(value) {
-
-        if (this.size >= this.capacity) {
-            return false;
-        }
-
-        this.size++;
-
-        const node =
-            new Node(value);
-
-        if (this.size === 1) {
-            this.bottom = node;
-        }
-
-        this.join(
-            node,
-            this.top
-        );
-
-        this.top = node;
-
-        return true;
-    }
-
-    pop() {
-
-        if (this.top === null) {
-            throw new Error(
-                "Stack is empty."
-            );
-        }
-
-        const oldTop =
-            this.top;
-
-        this.top =
-            this.top.below;
-
-        if (this.top !== null) {
-
-            this.top.above = null;
-
-        } else {
-
-            this.bottom = null;
-        }
-
-        this.size--;
-
-        return oldTop.value;
-    }
-
-    removeBottom() {
-
-        if (this.bottom === null) {
-            throw new Error(
-                "Stack is empty."
-            );
-        }
-
-        const oldBottom =
-            this.bottom;
-
-        this.bottom =
-            this.bottom.above;
-
-        if (this.bottom !== null) {
-
-            this.bottom.below = null;
-
-        } else {
-
-            this.top = null;
-        }
-
-        this.size--;
-
-        return oldBottom.value;
-    }
-
-    toString() {
-
-        const values = [];
-
-        let current =
-            this.bottom;
-
-        while (current !== null) {
-
-            values.push(
-                current.value
-            );
-
-            current =
-                current.above;
-        }
-
-        return `[${values.join(", ")}]`;
-    }
-}
-
-
-//====================================================
-// Solution (Book)
-// SetOfStacks
-//====================================================
-
-class SetOfStacks {
-
-    constructor(capacity) {
-
-        if (capacity <= 0) {
-            throw new Error(
-                "Capacity must be greater than 0."
-            );
-        }
-
-        this.capacity = capacity;
-
-        this.stacks = [];
-    }
-
-    getLastStack() {
-
-        if (this.stacks.length === 0) {
-            return null;
-        }
-
-        return this.stacks[
-            this.stacks.length - 1
-        ];
-    }
-
-    push(value) {
-
-        const last =
-            this.getLastStack();
-
-        if (
-            last !== null &&
-            !last.isFull()
-        ) {
-
-            last.push(value);
-
-        } else {
-
-            const stack =
-                new PlateStack(
-                    this.capacity
-                );
-
-            stack.push(value);
-
-            this.stacks.push(stack);
+            while (this.stackNewest.length !== 0) {
+                this.stackOldest.push(this.stackNewest.pop());
+            }
         }
     }
 
-    pop() {
+    peek() {
 
-        const last =
-            this.getLastStack();
+        // Ensure stackOldest has the oldest element on top.
+        this.shiftStacks();
 
-        if (last === null) {
-            throw new Error(
-                "SetOfStacks is empty."
-            );
+        if (this.stackOldest.length === 0) {
+            throw new Error("Queue is empty.");
         }
 
-        const value =
-            last.pop();
-
-        if (last.isEmpty()) {
-            this.stacks.pop();
-        }
-
-        return value;
+        return this.stackOldest[this.stackOldest.length - 1];
     }
 
-    //====================================================
-    // popAt
-    // Book Follow Up
-    //====================================================
+    remove() {
 
-    popAt(index) {
+        // Ensure stackOldest has the oldest element on top.
+        this.shiftStacks();
 
-        if (
-            index < 0 ||
-            index >= this.stacks.length
-        ) {
-
-            throw new Error(
-                `Invalid stack index: ${index}`
-            );
+        if (this.stackOldest.length === 0) {
+            throw new Error("Queue is empty.");
         }
 
-        return this.leftShift(
-            index,
-            true
-        );
-    }
-
-    //====================================================
-    // leftShift
-    // Book Rollover Algorithm
-    //====================================================
-
-    leftShift(index, removeTop) {
-
-        const stack =
-            this.stacks[index];
-
-        let removedItem;
-
-        if (removeTop) {
-
-            removedItem =
-                stack.pop();
-
-        } else {
-
-            removedItem =
-                stack.removeBottom();
-        }
-
-        if (stack.isEmpty()) {
-
-            this.stacks.splice(
-                index,
-                1
-            );
-
-        } else if (
-            this.stacks.length > index + 1
-        ) {
-
-            const value =
-                this.leftShift(
-                    index + 1,
-                    false
-                );
-
-            stack.push(value);
-        }
-
-        return removedItem;
-    }
-
-    numberOfStacks() {
-
-        return this.stacks.length;
-    }
-
-    toString() {
-
-        return `[${this.stacks
-            .map(stack => stack.toString())
-            .join(", ")}]`;
+        return this.stackOldest.pop();
     }
 }
 
@@ -315,194 +69,152 @@ class SetOfStacks {
 // Tests
 //====================================================
 
-let output =
-    ">>> CTCI Chapter 3.3 - Stack of Plates <<<<br><br>";
+let output = "";
+
+output += "<b>>>> CTCI Chapter 3.4 - Queue via Stacks <<<</b><br><br>";
 
 
 //====================================================
-// Test 1
-// Push - Create Multiple Sub-Stacks
+// Test 1: Basic FIFO behavior
 //====================================================
 
-output +=
-    "<b>========== Test 1 : Push / Multiple Stacks ==========</b><br><br>";
+output += "<b>Test 1: Basic FIFO behavior</b><br>";
 
-const stacks =
-    new SetOfStacks(3);
+const queue1 = new MyQueue();
 
-for (let i = 1; i <= 10; i++) {
+queue1.add(1);
+queue1.add(2);
+queue1.add(3);
+queue1.add(4);
+queue1.add(5);
 
-    output +=
-        `Push : ${i}<br>`;
+output += "Queue size: " + queue1.size() + "<br>";
+output += "Peek: " + queue1.peek() + "<br>";
 
-    stacks.push(i);
+output += "Remove: " + queue1.remove() + "<br>";
+output += "Remove: " + queue1.remove() + "<br>";
+output += "Remove: " + queue1.remove() + "<br>";
 
-    output +=
-        `Stacks : ${stacks.toString()}<br>`;
-}
-
-output += "<br>";
-
-output +=
-    `Number of sub-stacks : ${stacks.numberOfStacks()}<br><br>`;
+output += "Queue size: " + queue1.size() + "<br><br>";
 
 
 //====================================================
-// Test 2
-// Normal Pop
+// Test 2: Add after remove
 //====================================================
 
-output +=
-    "<b>========== Test 2 : Normal Pop ==========</b><br><br>";
+output += "<b>Test 2: Add after remove</b><br>";
 
-output +=
-    `Before : ${stacks.toString()}<br>`;
+const queue2 = new MyQueue();
 
-output +=
-    `Pop : ${stacks.pop()}<br>`;
+queue2.add(10);
+queue2.add(20);
+queue2.add(30);
 
-output +=
-    `After : ${stacks.toString()}<br><br>`;
+output += "Remove: " + queue2.remove() + "<br>"; // 10
 
-output +=
-    `Pop : ${stacks.pop()}<br>`;
+queue2.add(40);
+queue2.add(50);
 
-output +=
-    `After : ${stacks.toString()}<br><br>`;
-
-
-//====================================================
-// Test 3
-// popAt(index) - Book Follow Up
-//====================================================
-
-output +=
-    "<b>========== Test 3 : popAt(index) / Rollover ==========</b><br><br>";
-
-const rolloverStacks =
-    new SetOfStacks(3);
-
-for (let i = 1; i <= 10; i++) {
-    rolloverStacks.push(i);
-}
-
-output +=
-    `Before         : ${rolloverStacks.toString()}<br>`;
-
-output +=
-    `popAt(0)       : ${rolloverStacks.popAt(0)}<br>`;
-
-output +=
-    `After rollover : ${rolloverStacks.toString()}<br><br>`;
+output += "Remove: " + queue2.remove() + "<br>"; // 20
+output += "Remove: " + queue2.remove() + "<br>"; // 30
+output += "Remove: " + queue2.remove() + "<br>"; // 40
+output += "Remove: " + queue2.remove() + "<br><br>"; // 50
 
 
 //====================================================
-// Test 4
-// popAt Middle Stack
+// Test 3: Peek should not remove
 //====================================================
 
-output +=
-    "<b>========== Test 4 : popAt Middle Stack ==========</b><br><br>";
+output += "<b>Test 3: Peek should not remove</b><br>";
 
-const middleStacks =
-    new SetOfStacks(3);
+const queue3 = new MyQueue();
 
-for (let i = 1; i <= 10; i++) {
-    middleStacks.push(i);
-}
+queue3.add(100);
+queue3.add(200);
+queue3.add(300);
 
-output +=
-    `Before         : ${middleStacks.toString()}<br>`;
+output += "Size before peek: " + queue3.size() + "<br>";
+output += "Peek: " + queue3.peek() + "<br>";
+output += "Peek again: " + queue3.peek() + "<br>";
+output += "Size after peek: " + queue3.size() + "<br>";
 
-output +=
-    `popAt(1)       : ${middleStacks.popAt(1)}<br>`;
-
-output +=
-    `After rollover : ${middleStacks.toString()}<br><br>`;
+output += "Remove: " + queue3.remove() + "<br><br>";
 
 
 //====================================================
-// Test 5
-// Pop Removes Empty Last Stack
+// Test 4: Interleaved operations
 //====================================================
 
-output +=
-    "<b>========== Test 5 : Remove Empty Last Stack ==========</b><br><br>";
+output += "<b>Test 4: Interleaved operations</b><br>";
 
-const smallStacks =
-    new SetOfStacks(2);
+const queue4 = new MyQueue();
 
-smallStacks.push(10);
-smallStacks.push(20);
-smallStacks.push(30);
+queue4.add(1);
+queue4.add(2);
 
-output +=
-    `Before : ${smallStacks.toString()}<br>`;
+output += "Remove: " + queue4.remove() + "<br>"; // 1
 
-output +=
-    `Pop : ${smallStacks.pop()}<br>`;
+queue4.add(3);
+queue4.add(4);
 
-output +=
-    `After : ${smallStacks.toString()}<br>`;
+output += "Remove: " + queue4.remove() + "<br>"; // 2
 
-output +=
-    `Number of sub-stacks : ${smallStacks.numberOfStacks()}<br><br>`;
+queue4.add(5);
+
+output += "Remove: " + queue4.remove() + "<br>"; // 3
+output += "Remove: " + queue4.remove() + "<br>"; // 4
+output += "Remove: " + queue4.remove() + "<br><br>"; // 5
 
 
 //====================================================
-// Test 6
-// Empty Stack
+// Test 5: String values
 //====================================================
 
-output +=
-    "<b>========== Test 6 : Empty Stack ==========</b><br><br>";
+output += "<b>Test 5: String values</b><br>";
 
-const emptyStacks =
-    new SetOfStacks(3);
+const queue5 = new MyQueue();
+
+queue5.add("A");
+queue5.add("B");
+queue5.add("C");
+
+output += "Remove: " + queue5.remove() + "<br>";
+output += "Remove: " + queue5.remove() + "<br>";
+output += "Remove: " + queue5.remove() + "<br><br>";
+
+
+//====================================================
+// Test 6: Remove from empty queue
+//====================================================
+
+output += "<b>Test 6: Remove from empty queue</b><br>";
+
+const queue6 = new MyQueue();
 
 try {
-
-    emptyStacks.pop();
-
+    queue6.remove();
 } catch (error) {
-
-    output +=
-        `Pop from empty SetOfStacks -> ${error.message}<br>`;
+    output += "Caught expected error: " + error.message + "<br>";
 }
 
 output += "<br>";
 
 
 //====================================================
-// Test 7
-// Invalid popAt Index
+// Test 7: Peek empty queue
 //====================================================
 
-output +=
-    "<b>========== Test 7 : Invalid popAt Index ==========</b><br><br>";
+output += "<b>Test 7: Peek empty queue</b><br>";
 
-const invalidStacks =
-    new SetOfStacks(3);
-
-invalidStacks.push(1);
-invalidStacks.push(2);
-invalidStacks.push(3);
+const queue7 = new MyQueue();
 
 try {
-
-    invalidStacks.popAt(5);
-
+    queue7.peek();
 } catch (error) {
-
-    output +=
-        `popAt(5) -> ${error.message}<br>`;
+    output += "Caught expected error: " + error.message + "<br>";
 }
 
-output += "<br>";
-
-output +=
-    "<b>Study Complete.</b>";
+output += "<br><b>Study Complete.</b>";
 
 
-document.querySelector("#t1").innerHTML =
-    output;
+document.querySelector("#t1").innerHTML = output;
