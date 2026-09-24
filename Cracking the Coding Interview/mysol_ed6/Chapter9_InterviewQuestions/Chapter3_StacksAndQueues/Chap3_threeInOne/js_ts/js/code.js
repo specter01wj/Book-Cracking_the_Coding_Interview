@@ -1,268 +1,708 @@
-class LinkedListNode {
+class FixedMultiStack {
 
-    constructor(data) {
-        this.data = data;
-        this.next = null;
+    //====================================================
+    // Solution 1 (Book)
+    // Fixed Division
+    //====================================================
+
+    constructor(stackSize) {
+
+        if (stackSize <= 0) {
+            throw new Error(
+                "Stack size must be greater than 0."
+            );
+        }
+
+        this.NUMBER_OF_STACKS = 3;
+
+        this.stackCapacity = stackSize;
+
+        this.values =
+            new Array(stackSize * this.NUMBER_OF_STACKS).fill(0);
+
+        this.sizes =
+            new Array(this.NUMBER_OF_STACKS).fill(0);
     }
 
-}
+    push(stackNum, value) {
 
-class Result {
+        this.validateStackNum(stackNum);
 
-    constructor(node, result) {
-        this.node = node;
-        this.result = result;
+        if (this.isFull(stackNum)) {
+            throw new Error(
+                `Stack ${stackNum} is full.`
+            );
+        }
+
+        this.sizes[stackNum]++;
+
+        this.values[this.indexOfTop(stackNum)] = value;
     }
 
+    pop(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        if (this.isEmpty(stackNum)) {
+            throw new Error(
+                `Stack ${stackNum} is empty.`
+            );
+        }
+
+        const topIndex =
+            this.indexOfTop(stackNum);
+
+        const value =
+            this.values[topIndex];
+
+        this.values[topIndex] = 0;
+
+        this.sizes[stackNum]--;
+
+        return value;
+    }
+
+    peek(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        if (this.isEmpty(stackNum)) {
+            throw new Error(
+                `Stack ${stackNum} is empty.`
+            );
+        }
+
+        return this.values[
+            this.indexOfTop(stackNum)
+        ];
+    }
+
+    isEmpty(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        return this.sizes[stackNum] === 0;
+    }
+
+    isFull(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        return this.sizes[stackNum]
+            === this.stackCapacity;
+    }
+
+    size(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        return this.sizes[stackNum];
+    }
+
+    indexOfTop(stackNum) {
+
+        const offset =
+            stackNum * this.stackCapacity;
+
+        const size =
+            this.sizes[stackNum];
+
+        return offset + size - 1;
+    }
+
+    validateStackNum(stackNum) {
+
+        if (
+            stackNum < 0 ||
+            stackNum >= this.NUMBER_OF_STACKS
+        ) {
+
+            throw new Error(
+                "Stack number must be 0, 1, or 2."
+            );
+        }
+    }
 }
 
-class Chap2_palindrome {
+
+//====================================================
+// StackInfo
+// Used by Solution 2
+//====================================================
+
+class StackInfo {
+
+    constructor(start, capacity, owner) {
+
+        this.start = start;
+        this.size = 0;
+        this.capacity = capacity;
+
+        this.owner = owner;
+    }
+
+    isWithinStackCapacity(index) {
+
+        if (
+            index < 0 ||
+            index >= this.owner.values.length
+        ) {
+            return false;
+        }
+
+        const contiguousIndex =
+            index < this.start
+                ? index + this.owner.values.length
+                : index;
+
+        const end =
+            this.start + this.capacity;
+
+        return (
+            this.start <= contiguousIndex &&
+            contiguousIndex < end
+        );
+    }
+
+    lastCapacityIndex() {
+
+        return this.owner.adjustIndex(
+            this.start + this.capacity - 1
+        );
+    }
+
+    lastElementIndex() {
+
+        return this.owner.adjustIndex(
+            this.start + this.size - 1
+        );
+    }
+
+    isFull() {
+
+        return this.size === this.capacity;
+    }
+
+    isEmpty() {
+
+        return this.size === 0;
+    }
+}
+
+
+class FlexibleMultiStack {
+
+    //====================================================
+    // Solution 2 (Book)
+    // Flexible Division
+    //====================================================
+
+    constructor(numberOfStacks, defaultSize) {
+
+        if (
+            numberOfStacks <= 0 ||
+            defaultSize <= 0
+        ) {
+
+            throw new Error(
+                "Number of stacks and stack size must be greater than 0."
+            );
+        }
+
+        this.info =
+            new Array(numberOfStacks);
+
+        this.values =
+            new Array(
+                numberOfStacks * defaultSize
+            ).fill(0);
+
+        for (
+            let i = 0;
+            i < numberOfStacks;
+            i++
+        ) {
+
+            this.info[i] =
+                new StackInfo(
+                    defaultSize * i,
+                    defaultSize,
+                    this
+                );
+        }
+    }
+
+    push(stackNum, value) {
+
+        this.validateStackNum(stackNum);
+
+        if (this.allStacksAreFull()) {
+
+            throw new Error(
+                "All stacks are full."
+            );
+        }
+
+        const stack =
+            this.info[stackNum];
+
+        /*
+         * If this stack is full,
+         * borrow capacity from another stack.
+         */
+        if (stack.isFull()) {
+            this.expand(stackNum);
+        }
+
+        stack.size++;
+
+        this.values[
+            stack.lastElementIndex()
+        ] = value;
+    }
+
+    pop(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        const stack =
+            this.info[stackNum];
+
+        if (stack.isEmpty()) {
+
+            throw new Error(
+                `Stack ${stackNum} is empty.`
+            );
+        }
+
+        const topIndex =
+            stack.lastElementIndex();
+
+        const value =
+            this.values[topIndex];
+
+        this.values[topIndex] = 0;
+
+        stack.size--;
+
+        return value;
+    }
+
+    peek(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        const stack =
+            this.info[stackNum];
+
+        if (stack.isEmpty()) {
+
+            throw new Error(
+                `Stack ${stackNum} is empty.`
+            );
+        }
+
+        return this.values[
+            stack.lastElementIndex()
+        ];
+    }
+
+    isEmpty(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        return this.info[stackNum].isEmpty();
+    }
+
+    size(stackNum) {
+
+        this.validateStackNum(stackNum);
+
+        return this.info[stackNum].size;
+    }
+
+    //====================================================
+    // Expand
+    //====================================================
+
+    expand(stackNum) {
+
+        this.shift(
+            (stackNum + 1) % this.info.length
+        );
+
+        this.info[stackNum].capacity++;
+    }
+
+    //====================================================
+    // Shift
+    //====================================================
+
+    shift(stackNum) {
+
+        const stack =
+            this.info[stackNum];
+
+        /*
+         * If this stack is full, first shift
+         * the next stack recursively.
+         */
+        if (stack.size >= stack.capacity) {
+
+            const nextStack =
+                (stackNum + 1)
+                % this.info.length;
+
+            this.shift(nextStack);
+
+            stack.capacity++;
+        }
+
+        /*
+         * Shift all elements in this stack
+         * one position to the right.
+         */
+        let index =
+            stack.lastCapacityIndex();
+
+        while (
+            stack.isWithinStackCapacity(index)
+        ) {
+
+            this.values[index] =
+                this.values[
+                    this.previousIndex(index)
+                ];
+
+            index =
+                this.previousIndex(index);
+        }
+
+        /*
+         * Clear the old starting position.
+         */
+        this.values[stack.start] = 0;
+
+        /*
+         * Move the stack start forward.
+         */
+        stack.start =
+            this.nextIndex(stack.start);
+
+        /*
+         * Give one capacity position
+         * to the previous stack.
+         */
+        stack.capacity--;
+    }
 
     //====================================================
     // Helpers
     //====================================================
 
-    buildList(...values) {
-
-        if (values.length === 0) {
-            return null;
-        }
-
-        const head = new LinkedListNode(values[0]);
-        let current = head;
-
-        for (let i = 1; i < values.length; i++) {
-            current.next = new LinkedListNode(values[i]);
-            current = current.next;
-        }
-
-        return head;
-    }
-
-    listToString(head) {
-
-        if (head === null) {
-            return "Empty";
-        }
-
-        const result = [];
-
-        while (head !== null) {
-            result.push(head.data);
-            head = head.next;
-        }
-
-        return result.join(" -> ");
-    }
-
-    //====================================================
-    // Solution 1 (Book)
-    // Reverse and Compare
-    //====================================================
-
-    isPalindrome(head) {
-
-        const reversed = this.reverseAndClone(head);
-
-        return this.isEqual(head, reversed);
-    }
-
-    reverseAndClone(node) {
-
-        let head = null;
-
-        while (node !== null) {
-
-            const n = new LinkedListNode(node.data);
-
-            n.next = head;
-            head = n;
-
-            node = node.next;
-        }
-
-        return head;
-    }
-
-    isEqual(one, two) {
-
-        while (one !== null && two !== null) {
-
-            if (one.data !== two.data) {
-                return false;
-            }
-
-            one = one.next;
-            two = two.next;
-        }
-
-        return one === null && two === null;
-    }
-
-    //====================================================
-    // Solution 2 (Book)
-    // Iterative Using Stack
-    //====================================================
-
-    isPalindrome2(head) {
-
-        let fast = head;
-        let slow = head;
-
-        const stack = [];
-
-        while (fast !== null && fast.next !== null) {
-
-            stack.push(slow.data);
-
-            slow = slow.next;
-            fast = fast.next.next;
-        }
-
-        // Odd number of nodes, skip the middle node.
-        if (fast !== null) {
-            slow = slow.next;
-        }
-
-        while (slow !== null) {
-
-            const top = stack.pop();
-
-            if (top !== slow.data) {
-                return false;
-            }
-
-            slow = slow.next;
-        }
-
-        return true;
-    }
-
-    //====================================================
-    // Solution 3 (Book)
-    // Recursive
-    //====================================================
-
-    isPalindrome3(head) {
-
-        const length = this.lengthOfList(head);
-
-        const p = this.isPalindromeRecurse(head, length);
-
-        return p.result;
-    }
-
-    isPalindromeRecurse(head, length) {
-
-        if (head === null || length <= 0) {
-
-            // Even number of nodes.
-            return new Result(head, true);
-
-        } else if (length === 1) {
-
-            // Odd number of nodes.
-            return new Result(head.next, true);
-        }
-
-        const res = this.isPalindromeRecurse(head.next, length - 2);
-
-        if (!res.result || res.node === null) {
-            return res;
-        }
-
-        res.result = (head.data === res.node.data);
-
-        res.node = res.node.next;
-
-        return res;
-    }
-
-    lengthOfList(head) {
+    numberOfElements() {
 
         let size = 0;
 
-        while (head !== null) {
-            size++;
-            head = head.next;
+        for (const stack of this.info) {
+            size += stack.size;
         }
 
         return size;
     }
 
+    allStacksAreFull() {
+
+        return this.numberOfElements()
+            === this.values.length;
+    }
+
+    adjustIndex(index) {
+
+        const max =
+            this.values.length;
+
+        /*
+         * JavaScript's % can return a negative
+         * result, so normalize it.
+         */
+        return (
+            (index % max) + max
+        ) % max;
+    }
+
+    nextIndex(index) {
+
+        return this.adjustIndex(
+            index + 1
+        );
+    }
+
+    previousIndex(index) {
+
+        return this.adjustIndex(
+            index - 1
+        );
+    }
+
+    validateStackNum(stackNum) {
+
+        if (
+            stackNum < 0 ||
+            stackNum >= this.info.length
+        ) {
+
+            throw new Error(
+                `Invalid stack number: ${stackNum}`
+            );
+        }
+    }
+
+    //====================================================
+    // Display Helper
+    //====================================================
+
+    stateToString() {
+
+        let result =
+            `Array : [${this.values.join(", ")}]<br>`;
+
+        for (
+            let i = 0;
+            i < this.info.length;
+            i++
+        ) {
+
+            const stack =
+                this.info[i];
+
+            result +=
+                `Stack ${i} -> ` +
+                `start: ${stack.start}, ` +
+                `size: ${stack.size}, ` +
+                `capacity: ${stack.capacity}<br>`;
+        }
+
+        return result;
+    }
 }
 
-const test = new Chap2_palindrome();
 
-const tests = [
+//====================================================
+// Tests
+//====================================================
 
-    test.buildList(),
+let output =
+    ">>> CTCI Chapter 3.1 - Three in One <<<<br><br>";
 
-    test.buildList(1),
-
-    test.buildList(1, 1),
-
-    test.buildList(1, 2),
-
-    test.buildList(1, 2, 1),
-
-    test.buildList(1, 2, 2, 1),
-
-    test.buildList(1, 2, 3, 2, 1),
-
-    test.buildList(1, 2, 3, 4, 1),
-
-    test.buildList(0, 1, 2, 1, 0),
-
-    test.buildList(5, 4, 4, 5),
-
-    test.buildList(9, 8, 7, 8, 9),
-
-    test.buildList(1, 2, 3, 4, 5)
-
-];
-
-let output = ">>> CTCI Chapter 2.6 - Palindrome <<<br><br>";
 
 //====================================================
 // Solution 1
 //====================================================
 
-output += "<b>========== Solution 1 : Reverse and Compare ==========</b><br><br>";
+output +=
+    "<b>========== Solution 1 : Fixed Division ==========</b><br><br>";
 
-tests.forEach(head => {
+const fixedStacks =
+    new FixedMultiStack(3);
 
-    output += `List : ${test.listToString(head)}<br>`;
-    output += `Result : ${test.isPalindrome(head)}<br><br>`;
+output +=
+    "Push values into all three stacks:<br>";
 
-});
+fixedStacks.push(0, 10);
+fixedStacks.push(0, 20);
+fixedStacks.push(0, 30);
+
+fixedStacks.push(1, 100);
+fixedStacks.push(1, 200);
+
+fixedStacks.push(2, 1000);
+
+output +=
+    `Stack 0 top : ${fixedStacks.peek(0)}<br>`;
+
+output +=
+    `Stack 1 top : ${fixedStacks.peek(1)}<br>`;
+
+output +=
+    `Stack 2 top : ${fixedStacks.peek(2)}<br><br>`;
+
+
+output +=
+    `Pop Stack 0 : ${fixedStacks.pop(0)}<br>`;
+
+output +=
+    `Pop Stack 0 : ${fixedStacks.pop(0)}<br>`;
+
+output +=
+    `Stack 0 top : ${fixedStacks.peek(0)}<br><br>`;
+
+
+output +=
+    `Stack 0 size : ${fixedStacks.size(0)}<br>`;
+
+output +=
+    `Stack 1 size : ${fixedStacks.size(1)}<br>`;
+
+output +=
+    `Stack 2 size : ${fixedStacks.size(2)}<br><br>`;
+
+
+output +=
+    "Fill Stack 0 again:<br>";
+
+fixedStacks.push(0, 40);
+fixedStacks.push(0, 50);
+
+output +=
+    `Stack 0 top : ${fixedStacks.peek(0)}<br>`;
+
+output +=
+    `Stack 0 full: ${fixedStacks.isFull(0)}<br><br>`;
+
+
+output +=
+    "Try to push another value into full Stack 0:<br>";
+
+try {
+
+    fixedStacks.push(0, 60);
+
+} catch (error) {
+
+    output +=
+        `Exception : ${error.message}<br>`;
+}
+
+output += "<br>";
+
 
 //====================================================
 // Solution 2
 //====================================================
 
-output += "<b>========== Solution 2 : Stack ==========</b><br><br>";
+output +=
+    "<b>========== Solution 2 : Flexible Division ==========</b><br><br>";
 
-tests.forEach(head => {
+const flexibleStacks =
+    new FlexibleMultiStack(3, 2);
 
-    output += `List : ${test.listToString(head)}<br>`;
-    output += `Result : ${test.isPalindrome2(head)}<br><br>`;
 
-});
+output +=
+    "Initial capacity:<br>";
 
-//====================================================
-// Solution 3
-//====================================================
+output +=
+    flexibleStacks.stateToString();
 
-output += "<b>========== Solution 3 : Recursive ==========</b><br><br>";
+output += "<br>";
 
-tests.forEach(head => {
 
-    output += `List : ${test.listToString(head)}<br>`;
-    output += `Result : ${test.isPalindrome3(head)}<br><br>`;
+output +=
+    "Fill Stack 0:<br>";
 
-});
+flexibleStacks.push(0, 10);
+flexibleStacks.push(0, 20);
 
-output += "<b>Study Complete.</b>";
+output +=
+    flexibleStacks.stateToString();
 
-document.querySelector("#t1").innerHTML = output;
+output += "<br>";
+
+
+output +=
+    "Push 30 into full Stack 0.<br>";
+
+output +=
+    "Stack 0 expands by shifting another stack.<br>";
+
+flexibleStacks.push(0, 30);
+
+output +=
+    flexibleStacks.stateToString();
+
+output += "<br>";
+
+
+output +=
+    "Push more values:<br>";
+
+flexibleStacks.push(1, 100);
+flexibleStacks.push(1, 200);
+
+flexibleStacks.push(2, 1000);
+
+output +=
+    flexibleStacks.stateToString();
+
+output += "<br>";
+
+
+output +=
+    `Stack 0 top : ${flexibleStacks.peek(0)}<br>`;
+
+output +=
+    `Stack 1 top : ${flexibleStacks.peek(1)}<br>`;
+
+output +=
+    `Stack 2 top : ${flexibleStacks.peek(2)}<br><br>`;
+
+
+output +=
+    `Pop Stack 0 : ${flexibleStacks.pop(0)}<br>`;
+
+output +=
+    `Stack 0 top : ${flexibleStacks.peek(0)}<br><br>`;
+
+
+output +=
+    flexibleStacks.stateToString();
+
+output += "<br>";
+
+
+output +=
+    "Try to fill the remaining shared space:<br>";
+
+flexibleStacks.push(2, 2000);
+
+output +=
+    flexibleStacks.stateToString();
+
+output += "<br>";
+
+
+output +=
+    "Try to push when entire array is full:<br>";
+
+try {
+
+    flexibleStacks.push(2, 3000);
+
+} catch (error) {
+
+    output +=
+        `Exception : ${error.message}<br>`;
+}
+
+output += "<br>";
+
+
+output +=
+    "Final tops:<br>";
+
+output +=
+    `Stack 0 : ${flexibleStacks.peek(0)}<br>`;
+
+output +=
+    `Stack 1 : ${flexibleStacks.peek(1)}<br>`;
+
+output +=
+    `Stack 2 : ${flexibleStacks.peek(2)}<br><br>`;
+
+
+output +=
+    "<b>Study Complete.</b>";
+
+
+document.querySelector("#t1").innerHTML =
+    output;
