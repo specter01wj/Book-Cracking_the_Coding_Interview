@@ -2,66 +2,50 @@
 // Solution
 //====================================================
 
-class MyQueue {
+function sort(s) {
 
-    constructor() {
-        this.stackNewest = [];
-        this.stackOldest = [];
-    }
+    const r = [];
 
-    size() {
-        return this.stackNewest.length + this.stackOldest.length;
-    }
-
-    add(value) {
+    while (s.length !== 0) {
 
         /*
-         * Push onto stackNewest, which always has
-         * the newest elements on top.
+         * Insert each element in s in sorted order into r.
          */
-        this.stackNewest.push(value);
+        const tmp = s.pop();
+
+        while (r.length !== 0 && r[r.length - 1] > tmp) {
+            s.push(r.pop());
+        }
+
+        r.push(tmp);
     }
 
     /*
-     * Move elements from stackNewest into stackOldest.
-     *
-     * This is done only when stackOldest is empty.
-     * Moving the elements reverses their order, placing
-     * the oldest element on top of stackOldest.
+     * Copy the elements from r back into s.
      */
-    shiftStacks() {
+    while (r.length !== 0) {
+        s.push(r.pop());
+    }
+}
 
-        if (this.stackOldest.length === 0) {
 
-            while (this.stackNewest.length !== 0) {
-                this.stackOldest.push(this.stackNewest.pop());
-            }
-        }
+//====================================================
+// Test Helper
+//====================================================
+
+function stackToString(stack) {
+    return "[" + stack.join(", ") + "]";
+}
+
+function printPopOrder(stack) {
+
+    const values = [];
+
+    while (stack.length !== 0) {
+        values.push(stack.pop());
     }
 
-    peek() {
-
-        // Ensure stackOldest has the oldest element on top.
-        this.shiftStacks();
-
-        if (this.stackOldest.length === 0) {
-            throw new Error("Queue is empty.");
-        }
-
-        return this.stackOldest[this.stackOldest.length - 1];
-    }
-
-    remove() {
-
-        // Ensure stackOldest has the oldest element on top.
-        this.shiftStacks();
-
-        if (this.stackOldest.length === 0) {
-            throw new Error("Queue is empty.");
-        }
-
-        return this.stackOldest.pop();
-    }
+    return values.join(" ");
 }
 
 
@@ -71,150 +55,157 @@ class MyQueue {
 
 let output = "";
 
-output += "<b>>>> CTCI Chapter 3.4 - Queue via Stacks <<<</b><br><br>";
+output += "<b>>>> CTCI Chapter 3.5 - Sort Stack <<<</b><br><br>";
 
 
 //====================================================
-// Test 1: Basic FIFO behavior
+// Test 1: Book-style example
 //====================================================
 
-output += "<b>Test 1: Basic FIFO behavior</b><br>";
+output += "<b>Test 1: Book-style example</b><br>";
 
-const queue1 = new MyQueue();
+const stack1 = [];
 
-queue1.add(1);
-queue1.add(2);
-queue1.add(3);
-queue1.add(4);
-queue1.add(5);
+stack1.push(7);
+stack1.push(10);
+stack1.push(5);
+stack1.push(8);
+stack1.push(12);
+stack1.push(3);
+stack1.push(1);
 
-output += "Queue size: " + queue1.size() + "<br>";
-output += "Peek: " + queue1.peek() + "<br>";
+output += "Before sort: " + stackToString(stack1) + "<br>";
 
-output += "Remove: " + queue1.remove() + "<br>";
-output += "Remove: " + queue1.remove() + "<br>";
-output += "Remove: " + queue1.remove() + "<br>";
+sort(stack1);
 
-output += "Queue size: " + queue1.size() + "<br><br>";
-
-
-//====================================================
-// Test 2: Add after remove
-//====================================================
-
-output += "<b>Test 2: Add after remove</b><br>";
-
-const queue2 = new MyQueue();
-
-queue2.add(10);
-queue2.add(20);
-queue2.add(30);
-
-output += "Remove: " + queue2.remove() + "<br>"; // 10
-
-queue2.add(40);
-queue2.add(50);
-
-output += "Remove: " + queue2.remove() + "<br>"; // 20
-output += "Remove: " + queue2.remove() + "<br>"; // 30
-output += "Remove: " + queue2.remove() + "<br>"; // 40
-output += "Remove: " + queue2.remove() + "<br><br>"; // 50
+output += "After sort:  " + stackToString(stack1) + "<br>";
+output += "Top: " + stack1[stack1.length - 1] + "<br>";
+output += "Pop order: " + printPopOrder(stack1) + "<br><br>";
 
 
 //====================================================
-// Test 3: Peek should not remove
+// Test 2: Reverse order
 //====================================================
 
-output += "<b>Test 3: Peek should not remove</b><br>";
+output += "<b>Test 2: Reverse order</b><br>";
 
-const queue3 = new MyQueue();
+const stack2 = [];
 
-queue3.add(100);
-queue3.add(200);
-queue3.add(300);
+stack2.push(5);
+stack2.push(4);
+stack2.push(3);
+stack2.push(2);
+stack2.push(1);
 
-output += "Size before peek: " + queue3.size() + "<br>";
-output += "Peek: " + queue3.peek() + "<br>";
-output += "Peek again: " + queue3.peek() + "<br>";
-output += "Size after peek: " + queue3.size() + "<br>";
+output += "Before sort: " + stackToString(stack2) + "<br>";
 
-output += "Remove: " + queue3.remove() + "<br><br>";
+sort(stack2);
 
-
-//====================================================
-// Test 4: Interleaved operations
-//====================================================
-
-output += "<b>Test 4: Interleaved operations</b><br>";
-
-const queue4 = new MyQueue();
-
-queue4.add(1);
-queue4.add(2);
-
-output += "Remove: " + queue4.remove() + "<br>"; // 1
-
-queue4.add(3);
-queue4.add(4);
-
-output += "Remove: " + queue4.remove() + "<br>"; // 2
-
-queue4.add(5);
-
-output += "Remove: " + queue4.remove() + "<br>"; // 3
-output += "Remove: " + queue4.remove() + "<br>"; // 4
-output += "Remove: " + queue4.remove() + "<br><br>"; // 5
+output += "After sort:  " + stackToString(stack2) + "<br>";
+output += "Pop order: " + printPopOrder(stack2) + "<br><br>";
 
 
 //====================================================
-// Test 5: String values
+// Test 3: Already sorted
 //====================================================
 
-output += "<b>Test 5: String values</b><br>";
+output += "<b>Test 3: Already sorted</b><br>";
 
-const queue5 = new MyQueue();
+const stack3 = [];
 
-queue5.add("A");
-queue5.add("B");
-queue5.add("C");
+stack3.push(1);
+stack3.push(2);
+stack3.push(3);
+stack3.push(4);
+stack3.push(5);
 
-output += "Remove: " + queue5.remove() + "<br>";
-output += "Remove: " + queue5.remove() + "<br>";
-output += "Remove: " + queue5.remove() + "<br><br>";
+output += "Before sort: " + stackToString(stack3) + "<br>";
 
+sort(stack3);
 
-//====================================================
-// Test 6: Remove from empty queue
-//====================================================
-
-output += "<b>Test 6: Remove from empty queue</b><br>";
-
-const queue6 = new MyQueue();
-
-try {
-    queue6.remove();
-} catch (error) {
-    output += "Caught expected error: " + error.message + "<br>";
-}
-
-output += "<br>";
+output += "After sort:  " + stackToString(stack3) + "<br>";
+output += "Pop order: " + printPopOrder(stack3) + "<br><br>";
 
 
 //====================================================
-// Test 7: Peek empty queue
+// Test 4: Duplicate values
 //====================================================
 
-output += "<b>Test 7: Peek empty queue</b><br>";
+output += "<b>Test 4: Duplicate values</b><br>";
 
-const queue7 = new MyQueue();
+const stack4 = [];
 
-try {
-    queue7.peek();
-} catch (error) {
-    output += "Caught expected error: " + error.message + "<br>";
-}
+stack4.push(4);
+stack4.push(2);
+stack4.push(5);
+stack4.push(2);
+stack4.push(3);
+stack4.push(4);
+stack4.push(1);
 
-output += "<br><b>Study Complete.</b>";
+output += "Before sort: " + stackToString(stack4) + "<br>";
 
+sort(stack4);
+
+output += "After sort:  " + stackToString(stack4) + "<br>";
+output += "Pop order: " + printPopOrder(stack4) + "<br><br>";
+
+
+//====================================================
+// Test 5: Negative numbers
+//====================================================
+
+output += "<b>Test 5: Negative numbers</b><br>";
+
+const stack5 = [];
+
+stack5.push(3);
+stack5.push(-2);
+stack5.push(7);
+stack5.push(0);
+stack5.push(-5);
+stack5.push(4);
+
+output += "Before sort: " + stackToString(stack5) + "<br>";
+
+sort(stack5);
+
+output += "After sort:  " + stackToString(stack5) + "<br>";
+output += "Pop order: " + printPopOrder(stack5) + "<br><br>";
+
+
+//====================================================
+// Test 6: Single element
+//====================================================
+
+output += "<b>Test 6: Single element</b><br>";
+
+const stack6 = [];
+
+stack6.push(42);
+
+output += "Before sort: " + stackToString(stack6) + "<br>";
+
+sort(stack6);
+
+output += "After sort:  " + stackToString(stack6) + "<br>";
+output += "Pop order: " + printPopOrder(stack6) + "<br><br>";
+
+
+//====================================================
+// Test 7: Empty stack
+//====================================================
+
+output += "<b>Test 7: Empty stack</b><br>";
+
+const stack7 = [];
+
+output += "Before sort: " + stackToString(stack7) + "<br>";
+
+sort(stack7);
+
+output += "After sort:  " + stackToString(stack7) + "<br><br>";
+
+output += "<b>Study Complete.</b>";
 
 document.querySelector("#t1").innerHTML = output;
